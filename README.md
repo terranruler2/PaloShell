@@ -17,57 +17,110 @@ The “MgmtSessionID” is the number you need to pass any other command you use in 
 #List of All Available commands
 
 Function Add-PaloAltoManagementSession
+
 Function Get-PaloAltoManagementSession
+
 Function Remove-PaloAltoManagementSession
+
 Function Show-PaRunningConfig 
+
 Function Show-PaRoutingTable 
+
 Function Show-PaRuleHitCount 
+
 Function Get-PaPolicyRoutingRules 
+
 Function Show-PaIpsecSa 
+
 Function Show-PaInfo 
+
 Function Show-PaInterface 
+
 Function Get-PaSessionInformation 
+
 Function Get-PaSecurityRules 
+
 Function Get-PaNATRules 
+
 Function Show-PaActiveSessions 
+
 Function Get-PaServices 
+
 Function Get-PaServiceGroups 
+
 Function Get-PaAddressObjects 
+
 Function Get-PaAddressGroups 
+
 Function Show-PaJobs
+
 Function Request-PaAvailableSoftwareVersions
+
 Function Get-PaAvailableSoftwareVersions
+
 Function Show-PaArpEntries 
+
 Function Check-PaLogsForBlockedTraffic 
+
 Function Request-PaLogs 
+
 Function Get-PaLogsFromJob 
+
 Function Get-PaTrafficLogs 
+
 Function Get-PaThreatLogs 
+
 Function Get-PaURLLogs 
+
 Function Show-PaUserIDMapping 
+
 Function Get-PaVirtualRouters 
+
 Function Show-PaHAStatus
+
 Function Set-PaPreviousContentPackage 
+
 Function Add-PaSecurityRule 
+
 Function Remove-PaSecurityRule 
+
 function Reboot-PaloAlto
+
 function Commit-PaloAltoConfiguration
+
 Function Move-PaSecurityRule
+
 Function Add-PaNATRule 
+
 Function Remove-PaNATRule 
+
 Function Move-PaNATRule
+
 Function Revert-PaloAltoConfiguration
+
 Function Add-PaAddressObject
+
 Function Update-PaAddressObject
+
 Function Remove-PaAddressObject
+
 Function Add-PaServiceObject
+
 Function Update-PaServiceObject
+
 Function Remove-PaServiceObject
+
 Function Add-PaAddressGroup
+
 Function Remove-PaAddressGroup
+
 Function Add-PaServiceGroup
+
 Function Remove-PaServiceGroup
+
 Function Download-PaPANOSVersion
+
 Function Install-PaPANOSVersion
-Function Add-PaUserIDMapping 
+
+Function Add-PaUserIDMapping
 
