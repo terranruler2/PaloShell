@@ -16,111 +16,111 @@ The “MgmtSessionID” is the number you need to pass any other command you use in 
 
 #List of All Available commands
 
-Function Add-PaloAltoManagementSession
+Add-PaAddressGroup
 
-Function Get-PaloAltoManagementSession
+Add-PaAddressObject
 
-Function Remove-PaloAltoManagementSession
+Add-PaloAltoManagementSession
 
-Function Show-PaRunningConfig 
+Add-PaNATRule
 
-Function Show-PaRoutingTable 
+Add-PaSecurityRule
 
-Function Show-PaRuleHitCount 
+Add-PaServiceGroup
 
-Function Get-PaPolicyRoutingRules 
+Add-PaServiceObject
 
-Function Show-PaIpsecSa 
+Add-PaUserIDMapping
 
-Function Show-PaInfo 
+Check-PaLogsForBlockedTraffic
 
-Function Show-PaInterface 
+Commit-PaloAltoConfiguration
 
-Function Get-PaSessionInformation 
+Download-PaPANOSVersion
 
-Function Get-PaSecurityRules 
+Get-PaAddressGroups
 
-Function Get-PaNATRules 
+Get-PaAddressObjects
 
-Function Show-PaActiveSessions 
+Get-PaAvailableSoftwareVersions
 
-Function Get-PaServices 
+Get-PaloAltoManagementSession
 
-Function Get-PaServiceGroups 
+Get-PaLogsFromJob
 
-Function Get-PaAddressObjects 
+Get-PaNATRules
 
-Function Get-PaAddressGroups 
+Get-PaPolicyRoutingRules
 
-Function Show-PaJobs
+Get-PaSecurityRules
 
-Function Request-PaAvailableSoftwareVersions
+Get-PaServiceGroups
 
-Function Get-PaAvailableSoftwareVersions
+Get-PaServices
 
-Function Show-PaArpEntries 
+Get-PaSessionInformation
 
-Function Check-PaLogsForBlockedTraffic 
+Get-PaThreatLogs
 
-Function Request-PaLogs 
+Get-PaTrafficLogs
 
-Function Get-PaLogsFromJob 
+Get-PaURLLogs
 
-Function Get-PaTrafficLogs 
+Get-PaVirtualRouters
 
-Function Get-PaThreatLogs 
+Install-PaPANOSVersion
 
-Function Get-PaURLLogs 
+Move-PaNATRule
 
-Function Show-PaUserIDMapping 
+Move-PaSecurityRule
 
-Function Get-PaVirtualRouters 
+Reboot-PaloAlto
 
-Function Show-PaHAStatus
+Remove-PaAddressGroup
 
-Function Set-PaPreviousContentPackage 
+Remove-PaAddressObject
 
-Function Add-PaSecurityRule 
+Remove-PaloAltoManagementSession
 
-Function Remove-PaSecurityRule 
+Remove-PaNATRule
 
-function Reboot-PaloAlto
+Remove-PaSecurityRule
 
-function Commit-PaloAltoConfiguration
+Remove-PaServiceGroup
 
-Function Move-PaSecurityRule
+Remove-PaServiceObject
 
-Function Add-PaNATRule 
+Request-PaAvailableSoftwareVersions
 
-Function Remove-PaNATRule 
+Request-PaLogs
 
-Function Move-PaNATRule
+Revert-PaloAltoConfiguration
 
-Function Revert-PaloAltoConfiguration
+Set-PaPreviousContentPackage
 
-Function Add-PaAddressObject
+Show-PaActiveSessions
 
-Function Update-PaAddressObject
+Show-PaArpEntries
 
-Function Remove-PaAddressObject
+Show-PaHAStatus
 
-Function Add-PaServiceObject
+Show-PaInfo
 
-Function Update-PaServiceObject
+Show-PaInterface
 
-Function Remove-PaServiceObject
+Show-PaIpsecSa
 
-Function Add-PaAddressGroup
+Show-PaJobs
 
-Function Remove-PaAddressGroup
+Show-PaRoutingTable
 
-Function Add-PaServiceGroup
+Show-PaRuleHitCount
 
-Function Remove-PaServiceGroup
+Show-PaRunningConfig
 
-Function Download-PaPANOSVersion
+Show-PaUserIDMapping
 
-Function Install-PaPANOSVersion
+Update-PaAddressObject
 
-Function Add-PaUserIDMapping
+Update-PaServiceObject
 
