@@ -18,6 +18,7 @@ The next command to run is “Add-PaloAltoManagementSession”. This command created
 “Add-PaloAltoManagementSession -hostname <hostname or IP address of firewall>”. That’s all you need. You will then be prompted to enter your username and password. (If you don’t have a valid SSL certificate on your firewall then shame on you but I’ve accounted for this. You can add the “-DisableSSLCertificateCheck” switch to the command and it will ignore the SSL certificate validity of the firewall. This is insecure!) If there is no error the output of this command is a PowerShell object. PowerShell should display something like this:
 
 Status  MgmtSessionID
+
 Success             3 
 
 
