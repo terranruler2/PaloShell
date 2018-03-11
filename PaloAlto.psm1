@@ -5187,3 +5187,9 @@ export-modulemember *-*
 Write-Host "Thank you for using this Palo Alto automation module. Please begin by creating a management session for a firewall by using the Add-PaloAltoManagementSession commandlet."
 
 
+#Other notes
+<#
+Run this super terrible powershell one liner to get the list of user available functions in this module.
+$test | where {$_ -match 'Function' -and $_ -match '[a-zA-Z]-[a-zA-Z]' -and $_ -notmatch ('<|/|"|#|\(|\.|\)' + "|'")} | %{$_.trim('{')} | select -Unique 
+
+#>
