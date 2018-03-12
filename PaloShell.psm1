@@ -1,6 +1,6 @@
 ﻿#Written by David Isaacs.
 #This is open source but please do not distribute without attribution.
-#This code is written to Support Powershell standard v3 and higher as well as Powershell Core/6. This is deliberate as I want this script to be run with default software installed on Windows if possible while also supporting Mac and OSX.
+#This code is written to Support Powershell standard v3 and higher as well as Powershell Core/6. This is deliberate as I want this script to be run with default software installed on Windows if possible while also supporting Linux and MacOS.
 #####################################################################################################################################################
 #The following code is run on module import.
 #Variables create here are scoped globally for the module only. These variables are only accessable by functions in this module. (Unless there's a bug I suppose)
@@ -1705,7 +1705,7 @@ Function Get-PaAddressGroups {
 
 <#
 .SYNOPSIS
-
+Show jobs the firewall is running or has run, or just the requested job by ID.
 .PARAMETER 
 
 .PARAMETER 
@@ -1878,6 +1878,13 @@ Function Get-PaAvailableSoftwareVersions
 	return $result
 }
 
+<#
+.SYNOPSIS
+This function will output all of the ARP enties the Palo Alto firewall has learned.
+.Parameter ID
+Required.
+This is the session ID of the firewall you wish to run this command on. 
+#>
 Function Show-PaArpEntries {
 	param (
     [Parameter(Mandatory=$true,valueFromPipeline=$true)][String]$ID
@@ -1911,18 +1918,35 @@ Function Show-PaArpEntries {
 
 <#
 .SYNOPSIS
-
-.PARAMETER 
-
-.PARAMETER 
-	
-.PARAMETER 
-	
-
-This currently does not support inputting an ipv6 address as a source or destination.
-If a name resolved to an IPv6 address this script will work apropriately.
+This function is used to check Palo Alto traffic, threat, and URL logs for blocked traffic. It can also return some logs so the user can get a better idea of why the traffic was blocked it desired.
+.Parameter ID
+Required.
+This is the session ID of the firewall you wish to run this command on. 
+.Parameter SearchAfterDate
+Optional.
+Specify a date that "Get-Date" command can interpret. This script will look for logs that date from the present time back until the time specified by this parameter.
+.Parameter SourceAddress
+Optional.
+Specify the source address to look for in the logs. This can be an IP address or hostname, it can also be a full URL (example: https://www.google.com:443/mainpage/test.html). The latter functionality was added to make it easier for people who don't know to resolve DNS names.
+If you want to specify a source port include it in standard URL format. Examples of this are: 192.168.1.50:80 , www.google.com:443 ,  [1fff:0:a88:85a3::ac1f]:8001
+.Parameter DestinationAddress
+Optional.
+Specify the destination address to look for in the logs. This can be an IP address or hostname, it can also be a full URL (example: https://www.google.com:443/mainpage/test.html). The latter functionality was added to make it easier for people who don't know to resolve DNS names.
+If you want to specify a source port include it in standard URL format. Examples of this are: 192.168.1.50:80 , www.google.com:443 ,  [1fff:0:a88:85a3::ac1f]:8001
+.Parameter NumberOfLogsToReturn
+Optional.
+By default this value is 1. You can increase this number to a maximum of 5000. This command is only useful if you use either or both of the returnLogs or ReturnRawLogs switches.
+.Parameter returnLogs
+Optional.
+Use this parameter to append formatted logs to the output of this command for review.
+.Parameter ReturnRawLogs
+Optional.
+Use this parameter to append the raw logs to the output of this command for review. These may change from time to time as PANOS versions change.
+.Description
+The basic output of this command just lets the user know whether or not there is blocked traffic in either the traffic, threat, and/or URL logs.
 #>
-Function Check-PaLogsForBlockedTraffic {
+Function Check-PaLogsForBlockedTraffic
+{
 	param (
     [Parameter(Mandatory=$true,valueFromPipeline=$true)][String]$ID,
 	[Parameter(Mandatory=$false,valueFromPipeline=$true)][String]$SearchAfterDate = (get-date (Get-Date).AddDays('-1') -Format 'yyyy/MM/dd HH:mm:ss'), #Only search the past day unless sotherwise specified.
@@ -2084,12 +2108,12 @@ Function Check-PaLogsForBlockedTraffic {
 		Add-Member -InputObject $returnObject  -MemberType NoteProperty -Name 'TrafficLogEntries' -Value $trafficLogs
 		Add-Member -InputObject $returnObject  -MemberType NoteProperty -Name 'ThreatLogEntries' -Value $threatLogs
 		Add-Member -InputObject $returnObject  -MemberType NoteProperty -Name 'URLLogEntries' -Value $urlLogs
-		if ($ReturnRawLogs)
-		{
-			Add-Member -InputObject $returnObject  -MemberType NoteProperty -Name 'RawTrafficLogEntries' -Value $trafficLogResponse.logs.RawLogs
-			Add-Member -InputObject $returnObject  -MemberType NoteProperty -Name 'RawThreatLogEntries' -Value $threatLogsResponse.logs.RawLogs
-			Add-Member -InputObject $returnObject  -MemberType NoteProperty -Name 'RawURLLogEntries' -Value $urlLogsResponse.logs.RawLogs
-		}
+	}
+	if ($ReturnRawLogs)
+	{
+		Add-Member -InputObject $returnObject  -MemberType NoteProperty -Name 'RawTrafficLogEntries' -Value $trafficLogResponse.logs.RawLogs
+		Add-Member -InputObject $returnObject  -MemberType NoteProperty -Name 'RawThreatLogEntries' -Value $threatLogsResponse.logs.RawLogs
+		Add-Member -InputObject $returnObject  -MemberType NoteProperty -Name 'RawURLLogEntries' -Value $urlLogsResponse.logs.RawLogs
 	}
 	Add-Member -InputObject $returnObject  -MemberType NoteProperty -Name 'SearchAfterDate' -Value $SearchAfterDate
 	return $returnObject
@@ -4533,16 +4557,19 @@ Function Install-PaPANOSVersion{
 
 <#
 .SYNOPSIS
-
-
-.PARAMETER  
-
-.PARAMETER 
-	
-.PARAMETER 
-	
-
-
+This function is used to add a user-id mapping to the Palo Alto firewall.
+.Parameter ID
+Required.
+This is the session ID of the firewall you wish to run this command on. 
+.Parameter Username
+Required.
+The username to be used for this mapping.
+.Parameter IpAddress
+Required.
+The IPv4 or IPv6 address to be used for this mapping.
+.Parameter Timeout
+Optional.
+Sets the time in minutes the mapping will be valid.
 #>
 Function Add-PaUserIDMapping{
 	param (
