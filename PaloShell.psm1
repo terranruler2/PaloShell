@@ -1,6 +1,9 @@
-﻿#Written by David Isaacs.
+﻿#Maintained by David Isaacs.
 #This is open source but please do not distribute without attribution.
 #This code is written to Support Powershell standard v3 and higher as well as Powershell Core/6. This is deliberate as I want this script to be run with default software installed on Windows if possible while also supporting Linux and MacOS.
+
+
+
 #####################################################################################################################################################
 #The following code is run on module import.
 #Variables create here are scoped globally for the module only. These variables are only accessable by functions in this module. (Unless there's a bug I suppose)
@@ -275,14 +278,14 @@ Function Add-PaloAltoManagementSession
 		{
 			Add-Member -InputObject $session -MemberType NoteProperty -Name 'VirtualSystem' -Value ('vsys' + [string]$VirtualSystemNumber)
 		}
-		#Add what information we do have the $managementSessions array. We actually don't have to remove it from the array later, powershell links the variable to it's entry in the array so future updates to the object apply anyway.
+		#Add what information we do have the $managementSessions array. We actually don't have to remove it from the array later, powershell links the variable to its entry in the array so future updates to the object apply anyway.
 		[void]$managementSessions.Add($session)
 		#Check to see if an old ID variable exists. If so remove it. This resolves an issue that is not properly caught when this function unexpectedly terminates and the ID variable is left in memory. This seems like a hack but it should resolve the issue with little work.
 		if ($ID)
 		{
 			Remove-Variable -Name ID -Scope Script
 		}
-		#Temporarily set a global ID variable to get through setup of the new session. Scope it as script to ensure any other modules that are called can access it.
+		#Temporarily set a global ID variable to get through setup of the new session. Scope it as script to ensure any other functions in this module that are called can access it.
 		New-Variable -name ID -Value $nextSessionID -Scope Script
 
 
