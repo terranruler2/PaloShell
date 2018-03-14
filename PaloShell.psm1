@@ -689,7 +689,7 @@ Function Show-PaRuleHitCount {
 	#Check that the firewall we are running this command on is on at least PANOS version 8.1
 	if (!(($PaloAltoManagementSessionTable.findSessionByID($ID).PANOSMajorVersion -eq 8 -and $PaloAltoManagementSessionTable.findSessionByID($ID).PANOSMinorVersion -ge 1) -or $PaloAltoManagementSessionTable.findSessionByID($ID).PANOSMajorVersion -gt 8))
 	{
-		throw "THe firewall must be running at least PANOS 8.1 to use this command."
+		throw "The firewall must be running at least PANOS 8.1 to use this command."
 	}
 	if (!$ApplicationOverride -and !$Authentication -and !$Decryption -and !$Dos -and !$Nat -and !$Pbf -and !$Qos -and !$Security -and !$TunnelInspect-and !$AllRuleTypes)
 	{
@@ -754,7 +754,7 @@ Function Show-PaRuleHitCount {
 	{
 		Add-Member -InputObject $result -MemberType NoteProperty -Name 'SecurityRuleHitCounts' -Value (getPaRuleHitCounts -ruleType 'security')
 	}
-		if ($TunnelInspect -or $AllRuleTypes)
+	if ($TunnelInspect -or $AllRuleTypes)
 	{
 		Add-Member -InputObject $result -MemberType NoteProperty -Name 'TunnelInspectRuleHitCounts' -Value (getPaRuleHitCounts -ruleType 'tunnel-inspect')
 	}
@@ -1034,6 +1034,14 @@ Function Show-PaInterface {
 		Add-Member -InputObject $object -MemberType NoteProperty -Name 'VSYS' -Value $entry.vsys
 		Add-Member -InputObject $object -MemberType NoteProperty -Name 'VlanTag' -Value $entry.tag
 		Add-Member -InputObject $object -MemberType NoteProperty -Name 'InterfaceID' -Value $entry.id
+		if ($entry.ip)
+		{
+			Add-Member -InputObject $object -MemberType NoteProperty -Name 'IPv4Addresses' -Value (($entry.ip.trim(' ')) -join ';') #Remove whitespace from output and join multiple addresses with a semicolon.
+		}
+		else
+		{
+			Add-Member -InputObject $object -MemberType NoteProperty -Name 'IPv4Addresses' -Value ''
+		}
 		if ($entry.addr6.member)
 		{
 			Add-Member -InputObject $object -MemberType NoteProperty -Name 'IPv6Addresses' -Value (($entry.addr6.member.trim(' ')) -join ';') #Remove whitespace from output and join multiple addresses with a semicolon.
@@ -1698,12 +1706,7 @@ Function Get-PaAddressGroups {
 		[void]$result.Add($AddressGroupResult)
 		Remove-Variable -Name AddressGroupResult
 	}
-	Remove-Variable -Name addressGroup
-	Remove-Variable -Name paAddressGroups
-	Remove-Variable -Name resultAddresses
 	return $result
-	Remove-Variable -Name result
-	Remove-Variable -Name paConfig
 }
 
 <#
@@ -4608,7 +4611,7 @@ Function Add-PaUserIDMapping{
 	#$response = $PaloAltoModuleWebClient.uploadstring("https://" + $PaloAltoManagementSessionTable.findSessionByID($ID).Hostname + "/api/?type=user-id&key=" + (GetPaAPIKeyClearText), $xmlString)
 	$response = $PaloAltoModuleWebClient.downloadstring("https://" + $PaloAltoManagementSessionTable.findSessionByID($ID).Hostname + "/api/?type=user-id&cmd=" + $xmlString + "&key=" + (GetPaAPIKeyClearText))
 	ReturnPaAPIErrorIfError($response) #This function checks for an error from the firewall and throws it if there is one.
-	return $response
+	#Do not return anything if the function executed as expected.
 }
 
 <#
@@ -5220,6 +5223,6 @@ Write-Host "Thank you for using this Palo Alto automation module. Please begin b
 #Other notes
 <#
 Run this super terrible powershell one liner to get the list of user available functions in this module.
-$test | where {$_ -match 'Function' -and $_ -match '[a-zA-Z]-[a-zA-Z]' -and $_ -notmatch ('<|/|"|#|\(|\.|\)' + "|'")} | %{$_.trim('{')} | select -Unique 
+Get-Content "<pathToModule>" | where {$_ -match 'Function' -and $_ -match '[a-zA-Z]-[a-zA-Z]' -and $_ -notmatch ('<|/|"|#|\(|\.|\)' + "|'")} | %{$_.trim('{')} | select -Unique | Sort-Object | %{$_.split(' ')[1]; Write-host}
 
 #>
