@@ -3327,17 +3327,15 @@ function Reboot-PaloAlto
 	{
 		Write-Output ('This command will reboot the firewall "' + $PaloAltoManagementSessionTable.findSessionByID($ID).Hostname + '". Are you sure you wish to continue? Enter Y or Yes for yes.')
 		$input = Read-Host
-		if (!([string]$input.ToLower -eq ('y' -or 'yes')))
+		if (!([string]$input.ToLower() -eq 'y' -or [string]$input.ToLower() -eq 'yes'))
 		{
-			Write-Output 'The user did not confirm the firewall reboot request.'
+			throw 'The user did not confirm the firewall reboot request.'
 		}
-	}else
-	{
-		#Reboot the firewwall.
-		$result = [xml]($PaloAltoModuleWebClient.downloadstring("https://" + $PaloAltoManagementSessionTable.findSessionByID($ID).Hostname + "/api/?type=op&cmd=<request><restart><system></system></restart></request>&key=" + (GetPaAPIKeyClearText)))
-		ReturnPaAPIErrorIfError($result) #This function checks for an error from the firewall and throws it if there is one.
-		return $result.response		
 	}
+	#Reboot the firewwall.
+	$result = [xml]($PaloAltoModuleWebClient.downloadstring("https://" + $PaloAltoManagementSessionTable.findSessionByID($ID).Hostname + "/api/?type=op&cmd=<request><restart><system></system></restart></request>&key=" + (GetPaAPIKeyClearText)))
+	ReturnPaAPIErrorIfError($result) #This function checks for an error from the firewall and throws it if there is one.
+	Write-Output "Reboot command was sent successfully."	
 }
 
 <#
@@ -3366,9 +3364,8 @@ function Commit-PaloAltoConfiguration
 	{
 		Write-Output ('This command will commit pending changes to the running configuration on "' + $PaloAltoManagementSessionTable.findSessionByID($ID).Hostname + '". Are you sure you wish to continue? Enter Y or Yes for yes.')
 		$input = Read-Host
-		if (!([string]$input.ToLower -eq ('y' -or 'yes')))
+		if (!([string]$input.ToLower() -eq 'y' -or [string]$input.ToLower() -eq 'yes'))
 		{
-			Remove-Variable -Name input
 			throw 'The user did not confirm the commit request.'
 		}
 	}
@@ -4139,7 +4136,7 @@ Function Add-PaServiceObject
 	[Parameter(Mandatory=$false,valueFromPipeline=$true)][String]$ServiceName,
 	[Parameter(Mandatory=$false,valueFromPipeline=$true)][Switch]$TCP,
 	[Parameter(Mandatory=$false,valueFromPipeline=$true)][Switch]$UDP,
-	[Parameter(Mandatory=$false,valueFromPipeline=$true)][String]$port,
+	[Parameter(Mandatory=$false,valueFromPipeline=$true)][String]$Port,
 	[Parameter(Mandatory=$false,valueFromPipeline=$true)][String]$Description
     )
 	if((!$PaloAltoManagementSessionTable.findSessionByID($ID)) -or (!$PaloAltoManagementSessionTable))
@@ -4215,7 +4212,7 @@ Function Update-PaServiceObject
 	[Parameter(Mandatory=$false,valueFromPipeline=$true)][String]$ServiceName,
 	[Parameter(Mandatory=$false,valueFromPipeline=$true)][Switch]$TCP,
 	[Parameter(Mandatory=$false,valueFromPipeline=$true)][Switch]$UDP,
-	[Parameter(Mandatory=$false,valueFromPipeline=$true)][String]$port,
+	[Parameter(Mandatory=$false,valueFromPipeline=$true)][String]$Port,
 	[Parameter(Mandatory=$false,valueFromPipeline=$true)][String]$Description
     )
 	if((!$PaloAltoManagementSessionTable.findSessionByID($ID)) -or (!$PaloAltoManagementSessionTable))
