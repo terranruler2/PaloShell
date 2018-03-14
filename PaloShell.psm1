@@ -577,7 +577,9 @@ Function getPaApiKey {
  <#
 .SYNOPSIS
 
-.PARAMETER 
+.Parameter ID
+Required.
+This is the session ID of the firewall you wish to run this command on. You can find the ID to firewall mapping by running the "Get-PaloAltoManagementSession" command.
 
 .PARAMETER 
 	
@@ -602,7 +604,9 @@ Function Show-PaRunningConfig {
  <#
 .SYNOPSIS
 
-.PARAMETER 
+.Parameter ID
+Required.
+This is the session ID of the firewall you wish to run this command on. You can find the ID to firewall mapping by running the "Get-PaloAltoManagementSession" command.
 
 .PARAMETER 
 	
@@ -636,7 +640,7 @@ Other:
 Timestamp values returned for the rule hitcounts are in UTC time. If a timestamp has the value "1/1/1970 12:00:00 AM" this means that this timestamp has never been updated. This is not a bug, it has been designed this way so dates are always returned as datetime objects.
 .Parameter ID
 Required.
-This is the session ID of the firewall you wish to run this command on.  
+This is the session ID of the firewall you wish to run this command on. You can find the ID to firewall mapping by running the "Get-PaloAltoManagementSession" command.
 .Parameter ApplicationOverride
 Optional.
 Specify this switch to return hitcounts for ApplicationOverride rules.
@@ -765,7 +769,9 @@ Function Show-PaRuleHitCount {
  <#
 .SYNOPSIS
 Returns a list of the Configured PBF rules from the candidate configuration.
-.PARAMETER 
+.Parameter ID
+Required.
+This is the session ID of the firewall you wish to run this command on. You can find the ID to firewall mapping by running the "Get-PaloAltoManagementSession" command. 
 
 .PARAMETER 
 	
@@ -943,8 +949,10 @@ Function Get-PaPolicyRoutingRules {
 }
  <#
 .SYNOPSIS
-
-.PARAMETER 
+Returns a list of IPsec SA's and their status. Currently returns raw XML. The output of this command will change soon.
+.Parameter ID
+Required.
+This is the session ID of the firewall you wish to run this command on. You can find the ID to firewall mapping by running the "Get-PaloAltoManagementSession" command.
 
 .PARAMETER 
 	
@@ -971,8 +979,10 @@ Function Show-PaIpsecSa {
 }
  <#
 .SYNOPSIS
-
-.PARAMETER 
+Shows information about the Palo Alto firewall. This is the equivalent to the output of the "show system info" command on the cli.
+.Parameter ID
+Required.
+This is the session ID of the firewall you wish to run this command on. You can find the ID to firewall mapping by running the "Get-PaloAltoManagementSession" command.
 
 .PARAMETER 
 	
@@ -998,13 +1008,14 @@ Function Show-PaInfo {
 
 <#
 .SYNOPSIS
+Shows Palo Alto firewall interfaces and their logical and physical status.
+.Parameter ID
+Required.
+This is the session ID of the firewall you wish to run this command on. You can find the ID to firewall mapping by running the "Get-PaloAltoManagementSession" command.
 
-.PARAMETER 
-
-.PARAMETER 
-	
-.PARAMETER 
-	
+.Parameter Interface
+Optional.
+If not specified, stats for all interfaces will be returned. If specified, stats only for the interface specified will be returned.
 
 
 #>
@@ -1080,13 +1091,10 @@ Function Show-PaInterface {
 
  <#
 .SYNOPSIS
-
-.PARAMETER 
-
-.PARAMETER 
-	
-.PARAMETER 
-	
+Returns information about Maximum supported sessions and active session counts on the Palo Alto firewall.
+.Parameter ID
+Required.
+This is the session ID of the firewall you wish to run this command on. You can find the ID to firewall mapping by running the "Get-PaloAltoManagementSession" command. 
 
 
 #>
@@ -1114,14 +1122,10 @@ Function Get-PaSessionInformation {
 }
 <#
 .SYNOPSIS
-
-.PARAMETER 
-
-.PARAMETER 
-	
-.PARAMETER 
-	
-
+Returns a list of Security rules configured on the Palo Alto firewall.
+.Parameter ID
+Required.
+This is the session ID of the firewall you wish to run this command on. You can find the ID to firewall mapping by running the "Get-PaloAltoManagementSession" command.
 
 #>
 Function Get-PaSecurityRules 
@@ -1278,14 +1282,10 @@ Function Get-PaSecurityRules
 }
 <#
 .SYNOPSIS
-
-.PARAMETER 
-
-.PARAMETER 
-	
-.PARAMETER 
-	
-
+Returns a list of NAT rules configured on the firewall.
+.Parameter ID
+Required.
+This is the session ID of the firewall you wish to run this command on. You can find the ID to firewall mapping by running the "Get-PaloAltoManagementSession" command.
 
 #>
 Function Get-PaNATRules {
@@ -1361,14 +1361,10 @@ Function Get-PaNATRules {
 
 <#
 .SYNOPSIS
-
-.PARAMETER 
-
-.PARAMETER 
-	
-.PARAMETER 
-	
-
+Returns a list of all active sessions on the firewall. This is the equivalent to running "show session all" on the command line. This function will iterate through all sessions beyond the 1024 default. Some sessions may be duplicated.
+.Parameter ID
+Required.
+This is the session ID of the firewall you wish to run this command on. You can find the ID to firewall mapping by running the "Get-PaloAltoManagementSession" command.
 
 #>
 Function Show-PaActiveSessions {
@@ -1398,14 +1394,10 @@ Function Show-PaActiveSessions {
 
 <#
 .SYNOPSIS
-
-.PARAMETER 
-
-.PARAMETER 
-	
-.PARAMETER 
-	
-
+Returns a list of configured PA services from the candidate configuration.
+.Parameter ID
+Required.
+This is the session ID of the firewall you wish to run this command on. You can find the ID to firewall mapping by running the "Get-PaloAltoManagementSession" command.
 
 #>
 Function Get-PaServices {
@@ -1454,14 +1446,10 @@ Function Get-PaServices {
 
 <#
 .SYNOPSIS
-
-.PARAMETER 
-
-.PARAMETER 
-	
-.PARAMETER 
-	
-
+Returns a list of configure service groups from the candidate configuration.
+.Parameter ID
+Required.
+This is the session ID of the firewall you wish to run this command on. You can find the ID to firewall mapping by running the "Get-PaloAltoManagementSession" command.
 
 #>
 Function Get-PaServiceGroups {
@@ -1543,15 +1531,10 @@ Function Get-PaServiceGroups {
 
 <#
 .SYNOPSIS
-
-.PARAMETER 
-
-.PARAMETER 
-	
-.PARAMETER 
-	
-
-
+Returns a list of configured address objects from the candidate configuration.
+.Parameter ID
+Required.
+This is the session ID of the firewall you wish to run this command on. You can find the ID to firewall mapping by running the "Get-PaloAltoManagementSession" command.
 #>
 Function Get-PaAddressObjects {
 	param (
@@ -1601,15 +1584,10 @@ Function Get-PaAddressObjects {
 
 <#
 .SYNOPSIS
-
-.PARAMETER 
-
-.PARAMETER 
-	
-.PARAMETER 
-	
-
-#This only works for static groups at this time.
+Returns a list of configured address groups from the candidate configuration. (This only works for static groups at this time.)
+.Parameter ID
+Required.
+This is the session ID of the firewall you wish to run this command on. You can find the ID to firewall mapping by running the "Get-PaloAltoManagementSession" command.
 #>
 Function Get-PaAddressGroups {
 	param (
@@ -1712,13 +1690,17 @@ Function Get-PaAddressGroups {
 <#
 .SYNOPSIS
 Show jobs the firewall is running or has run, or just the requested job by ID.
-.PARAMETER 
-
-.PARAMETER 
-	
-.PARAMETER 
-	
-
+.Parameter ID
+Required.
+This is the session ID of the firewall you wish to run this command on. You can find the ID to firewall mapping by running the "Get-PaloAltoManagementSession" command.
+.Parameter All
+Optional.
+Returns a list of all jobs in the firewall task list. Pending, Active, or completed.
+.Parameter Pending
+Optional.
+Returns a list of pending jobs in the firewall.
+.Parameter Processed
+Returns a list of Completed jobs in the firewall
 
 #>
 Function Show-PaJobs{
@@ -1765,15 +1747,10 @@ Function Show-PaJobs{
 
 <#
 .SYNOPSIS
-This function tells the firewall to refresh it's PANOS version list from the Palo Alto networks server and returns all availalbe software versions. If you only want a list of software versions the firewall is currently aware of please use the "Get-PaAvailableSoftwareVersions" command.
-.PARAMETER 
-
-.PARAMETER 
-	
-.PARAMETER 
-	
-
-
+This function tells the firewall to refresh it's PANOS version list from the Palo Alto networks server and returns all available software versions. If you only want a list of software versions the firewall is currently aware of please use the "Get-PaAvailableSoftwareVersions" command.
+.Parameter ID
+Required.
+This is the session ID of the firewall you wish to run this command on. You can find the ID to firewall mapping by running the "Get-PaloAltoManagementSession" command.
 #>
 Function Request-PaAvailableSoftwareVersions
 {
@@ -1824,13 +1801,9 @@ Function Request-PaAvailableSoftwareVersions
 <#
 .SYNOPSIS
 This function retrieves the list of PANOS versions the firewall is currently aware of. This function does not check for updates from Palo Alto servers. To do that please run the "Request-PaAvailableSoftwareVersions" command.
-.PARAMETER 
-
-.PARAMETER 
-	
-.PARAMETER 
-	
-
+.Parameter ID
+Required.
+This is the session ID of the firewall you wish to run this command on. You can find the ID to firewall mapping by running the "Get-PaloAltoManagementSession" command.
 
 #>
 Function Get-PaAvailableSoftwareVersions
@@ -1889,7 +1862,7 @@ Function Get-PaAvailableSoftwareVersions
 This function will output all of the ARP enties the Palo Alto firewall has learned.
 .Parameter ID
 Required.
-This is the session ID of the firewall you wish to run this command on. 
+This is the session ID of the firewall you wish to run this command on. You can find the ID to firewall mapping by running the "Get-PaloAltoManagementSession" command.
 #>
 Function Show-PaArpEntries {
 	param (
@@ -1927,7 +1900,7 @@ Function Show-PaArpEntries {
 This function is used to check Palo Alto traffic, threat, and URL logs for blocked traffic. It can also return some logs so the user can get a better idea of why the traffic was blocked it desired.
 .Parameter ID
 Required.
-This is the session ID of the firewall you wish to run this command on. 
+This is the session ID of the firewall you wish to run this command on. You can find the ID to firewall mapping by running the "Get-PaloAltoManagementSession" command.
 .Parameter SearchAfterDate
 Optional.
 Specify a date that "Get-Date" command can interpret. This script will look for logs that date from the present time back until the time specified by this parameter.
@@ -2128,13 +2101,12 @@ Function Check-PaLogsForBlockedTraffic
 <#
 .SYNOPSIS
 This is a generic function used to request a job to get PA logs.
-.PARAMETER 
+.Parameter ID
+Required.
+This is the session ID of the firewall you wish to run this command on. You can find the ID to firewall mapping by running the "Get-PaloAltoManagementSession" command.
 
-.PARAMETER 
-	
-.PARAMETER 
-	
-
+.Description
+Other:
 Relevant documentation.
 https://www.paloaltonetworks.com/documentation/71/pan-os/xml-api/pan-os-xml-api-request-types/retrieve-logs-api
 #>
@@ -2185,13 +2157,11 @@ Function Request-PaLogs {
 <#
 .SYNOPSIS
 This is a generic function used to get PA logs from a job.
-.PARAMETER 
-
-.PARAMETER 
-	
-.PARAMETER 
-	
-
+.Parameter ID
+Required.
+This is the session ID of the firewall you wish to run this command on. You can find the ID to firewall mapping by running the "Get-PaloAltoManagementSession" command.
+.Description
+Other:
 Relevant documentation.
 https://www.paloaltonetworks.com/documentation/71/pan-os/xml-api/pan-os-xml-api-request-types/retrieve-logs-api
 #>
@@ -2226,20 +2196,24 @@ Function Get-PaLogsFromJob {
 }
 <#
 .SYNOPSIS
-
-.PARAMETER 
-
-.PARAMETER 
-	
-.PARAMETER 
-	
-
-
+Returns a list of Traffic Logs from the firewall. Maximum of 5000 entries can be returned.
+.Parameter ID
+Required.
+This is the session ID of the firewall you wish to run this command on. You can find the ID to firewall mapping by running the "Get-PaloAltoManagementSession" command.
+.Parameter Query
+Optional:
+A query you supply, in the format you would used for a query for traffic logs in the web interface, to be used to filter log responses returned. If no query is specified the default query will only return logs from the last hour.
+.Parameter NumberOfLogsToReturn
+Optional:
+Use this to specify how many log entries you want returned (Maximum of 5000).
+.Paramter ReturnRawLogs
+Optional:
+Specify to have logs returned as an extra property in the output of this script. These logs will be output in the XML format they were recieved and not the standardized output this functions would normally return them in.
 #>
 Function Get-PaTrafficLogs {
 	param (
     [Parameter(Mandatory=$true,valueFromPipeline=$true)][String]$ID,
-	[Parameter(Mandatory=$false,valueFromPipeline=$true)][String]$query = ("(receive_time geq '" + (get-date (Get-Date).AddHours('-1') -Format 'yyyy/MM/dd HH:mm:ss') + "')"),# don't get an infinite number of logs, if the script is called without the query parameter only get the last hour.
+	[Parameter(Mandatory=$false,valueFromPipeline=$true)][String]$Query = ("(receive_time geq '" + (get-date (Get-Date).AddHours('-1') -Format 'yyyy/MM/dd HH:mm:ss') + "')"),# don't get an infinite number of logs, if the script is called without the query parameter only get the last hour.
     [Parameter(Mandatory=$false,valueFromPipeline=$true)][String]$NumberOfLogsToReturn = 5000, #Defines how many logs to return. Max 5000
 	[Parameter(Mandatory=$false,valueFromPipeline=$true)][switch]$ReturnRawLogs = $false
 	)
@@ -2247,7 +2221,7 @@ Function Get-PaTrafficLogs {
 	{
 		throw ('This session ID does not exist, you must create a session for this firewall or use an existing session. Check existing sessions using "Get-PaloAltoSession".')
 	}
-	$response = Request-PaLogs -ID $ID -query $query -NumberOfLogsToReturn $NumberOfLogsToReturn -traffic
+	$response = Request-PaLogs -ID $ID -Query $Query -NumberOfLogsToReturn $NumberOfLogsToReturn -traffic
 	$jobID = $response.job
 	sleep(1) # don't immediately poll for the results, chances are really good they aren't ready yet.
 	$response = Get-PaLogsFromJob -ID $ID -jobID $jobID
@@ -2315,15 +2289,19 @@ Function Get-PaTrafficLogs {
 
 <#
 .SYNOPSIS
-
-.PARAMETER 
-
-.PARAMETER 
-	
-.PARAMETER 
-	
-
-
+Returns a list of Threat Logs from the firewall. Maximum of 5000 entries can be returned.
+.Parameter ID
+Required.
+This is the session ID of the firewall you wish to run this command on. You can find the ID to firewall mapping by running the "Get-PaloAltoManagementSession" command.
+.Parameter Query
+Optional:
+A query you supply, in the format you would used for a query for threat logs in the web interface, to be used to filter log responses returned. If no query is specified the default query will only return logs from the last hour.
+.Parameter NumberOfLogsToReturn
+Optional:
+Use this to specify how many log entries you want returned (Maximum of 5000).
+.Paramter ReturnRawLogs
+Optional:
+Specify to have logs returned as an extra property in the output of this script. These logs will be output in the XML format they were recieved and not the standardized output this functions would normally return them in.
 #>
 Function Get-PaThreatLogs {
 	param (
@@ -2404,15 +2382,19 @@ Function Get-PaThreatLogs {
 
 <#
 .SYNOPSIS
-
-.PARAMETER 
-
-.PARAMETER 
-	
-.PARAMETER 
-	
-
-
+Returns a list of URL Logs from the firewall. Maximum of 5000 entries can be returned.
+.Parameter ID
+Required.
+This is the session ID of the firewall you wish to run this command on. You can find the ID to firewall mapping by running the "Get-PaloAltoManagementSession" command.
+.Parameter Query
+Optional:
+A query you supply, in the format you would used for a query for URL logs in the web interface, to be used to filter log responses returned. If no query is specified the default query will only return logs from the last hour.
+.Parameter NumberOfLogsToReturn
+Optional:
+Use this to specify how many log entries you want returned (Maximum of 5000).
+.Paramter ReturnRawLogs
+Optional:
+Specify to have logs returned as an extra property in the output of this script. These logs will be output in the XML format they were recieved and not the standardized output this functions would normally return them in.
 #>
 Function Get-PaURLLogs {
 	param (
@@ -2492,15 +2474,10 @@ Function Get-PaURLLogs {
 
 <#
 .SYNOPSIS
-Retrieves a list of users the firewall is aware of.
-.PARAMETER 
-
-.PARAMETER 
-	
-.PARAMETER 
-	
-
-
+Retrieves a list of users and their IP mappings the firewall is aware of.
+.Parameter ID
+Required.
+This is the session ID of the firewall you wish to run this command on. You can find the ID to firewall mapping by running the "Get-PaloAltoManagementSession" command.
 #>
 Function Show-PaUserIDMapping {
 	param (
@@ -2531,14 +2508,9 @@ Function Show-PaUserIDMapping {
 <#
 .SYNOPSIS
 Retrieves the candidate configuration for virtual routers configured oin the Palo Alto.
-.PARAMETER 
-
-.PARAMETER 
-	
-.PARAMETER 
-	
-
-
+.Parameter ID
+Required.
+This is the session ID of the firewall you wish to run this command on. You can find the ID to firewall mapping by running the "Get-PaloAltoManagementSession" command.
 #>
 Function Get-PaVirtualRouters {
 	param (
@@ -2556,14 +2528,9 @@ Function Get-PaVirtualRouters {
  <#
 .SYNOPSIS
 This function returns the High Availability status of the firewall.
-.PARAMETER 
-
-.PARAMETER 
-	
-.PARAMETER 
-	
-
-
+.Parameter ID
+Required.
+This is the session ID of the firewall you wish to run this command on. You can find the ID to firewall mapping by running the "Get-PaloAltoManagementSession" command.
 #>
 Function Show-PaHAStatus
 {
@@ -2626,13 +2593,9 @@ Function Show-PaHAStatus
 <#
 .SYNOPSIS
 This command rolls the firewall back to the previously installed application/threat content package.
-.PARAMETER 
-
-.PARAMETER 
-	
-.PARAMETER 
-
-
+.Parameter ID
+Required.
+This is the session ID of the firewall you wish to run this command on. You can find the ID to firewall mapping by running the "Get-PaloAltoManagementSession" command.
 #>
 Function Set-PaPreviousContentPackage {
 	param (
@@ -2652,7 +2615,9 @@ Function Set-PaPreviousContentPackage {
 <#
 .SYNOPSIS
 All changes are based on the candidate configuration.
-.PARAMETER 
+.Parameter ID
+Required.
+This is the session ID of the firewall you wish to run this command on. You can find the ID to firewall mapping by running the "Get-PaloAltoManagementSession" command.
 
 .PARAMETER 
 	
@@ -2920,13 +2885,10 @@ Function UpdatePaSecurityRule {
 
 <#
 .SYNOPSIS
-#If any non-mandatory argument is not specfied the script will default to using 'any' in the case of services, addresses, users, or zones, and none in the case of HIP-profiles, IPS profiles, and allow for the action.
-.PARAMETER 
-
-.PARAMETER 
-	
-.PARAMETER 
-	
+Adds the specified security rule to the firewall.
+.Parameter ID
+Required.
+This is the session ID of the firewall you wish to run this command on. You can find the ID to firewall mapping by running the "Get-PaloAltoManagementSession" command.
 
 
 #>
@@ -3004,7 +2966,7 @@ Function Add-PaSecurityRule {
 	$result = [xml]($PaloAltoModuleWebClient.downloadstring("https://" + $PaloAltoManagementSessionTable.findSessionByID($ID).Hostname + "/api/?type=config&action=get&xpath=/config/devices/entry[@name='" + $PaloAltoManagementSessionTable.findSessionByID($ID).DeviceName + "']/vsys/entry[@name='"+ $PaloAltoManagementSessionTable.findSessionByID($ID).VirtualSystem + "']/rulebase/security/rules/entry[@name='" + $RuleName + "']&key="  + (GetPaAPIKeyClearText)))
 	if ($result.response.result)
 	{
-		throw 'A rule by this name already exists. Please specify another name to add a rule or use the "Edit-PaSecurityRule" function to modify an existing rule.'
+		throw 'A rule by this name already exists. Please specify another name to add a rule or use the "Update-PaSecurityRule" function to modify an existing rule.'
 	}
 	#Build the rule configuration.
 	$xmlString = '' #Set this to empty to ensure we start the build clean.
@@ -3186,15 +3148,13 @@ Function Add-PaSecurityRule {
 
 <#
 .SYNOPSIS
-
-.PARAMETER 
-
-.PARAMETER 
-	
-.PARAMETER 
-	
-
-
+Remove the specified security rule from the candidate configuration.
+.Parameter ID
+Required.
+This is the session ID of the firewall you wish to run this command on. You can find the ID to firewall mapping by running the "Get-PaloAltoManagementSession" command.
+.Parameter RuleName
+Required.
+The name of the Security rule to remove.
 #>
 Function Remove-PaSecurityRule {
 	param (
@@ -3303,15 +3263,13 @@ Function Remove-PaSecurityRule {
 }#>
 <#
 .SYNOPSIS
-
-.PARAMETER 
-
-.PARAMETER 
-	
-.PARAMETER 
-	
-
-
+Reboot the specified firewall.
+.Parameter ID
+Required.
+This is the session ID of the firewall you wish to run this command on. You can find the ID to firewall mapping by running the "Get-PaloAltoManagementSession" command.
+.Parameter Force
+Optional.
+USE THIS PARAMETER WITH EXTREME CAUTION! Specify this parameter to bypass the prompt for the user to confirm the reboot. 
 #>
 function Reboot-PaloAlto
 {
@@ -3340,15 +3298,13 @@ function Reboot-PaloAlto
 
 <#
 .SYNOPSIS
-
-.PARAMETER 
-
-.PARAMETER 
-	
-.PARAMETER 
-	
-
-
+Commit pending changes on the firewall.
+.Parameter ID
+Required.
+This is the session ID of the firewall you wish to run this command on. You can find the ID to firewall mapping by running the "Get-PaloAltoManagementSession" command.
+.Parameter Force
+Optional.
+USE THIS PARAMETER WITH EXTREME CAUTION! Specify this parameter to bypass the prompt for the user to confirm the commit. 
 #>
 function Commit-PaloAltoConfiguration
 {
@@ -3427,15 +3383,25 @@ This code is no longer needed. It was buggy and has been replaced by the functio
 
 <#
 .SYNOPSIS
-
-.PARAMETER 
-
-.PARAMETER 
-	
-.PARAMETER 
-	
-
-
+Move the specified security rule up or down in the rule list.
+.Parameter ID
+Required.
+This is the session ID of the firewall you wish to run this command on. You can find the ID to firewall mapping by running the "Get-PaloAltoManagementSession" command.
+.Parameter RuleToMove
+Required.
+The rule that you wish to move.
+.Parameter MoveToTop
+Optional.
+Move the rule to the top of the rule list.
+.Parameter MoveToBottom
+Optional.
+Move the rule to the bottom of the rule list.
+.Parameter MoveAfterRule
+Optional.
+Use this parameter to specify the rule name to move the "RuleToMove" below.
+.Parameter MoveBeforeRule
+Optional.
+Use this parameter to specify the rule name to move the "RuleToMove" above.
 #>
 Function Move-PaSecurityRule
 {
@@ -3479,7 +3445,9 @@ Function Move-PaSecurityRule
 <#
 .SYNOPSIS
 
-.PARAMETER 
+.Parameter ID
+Required.
+This is the session ID of the firewall you wish to run this command on. You can find the ID to firewall mapping by running the "Get-PaloAltoManagementSession" command.
 
 .PARAMETER 
 	
@@ -3488,7 +3456,7 @@ Function Move-PaSecurityRule
 
 
 #>
-Function RenamePaSecurityRule #This function needs re-written, it relies on a deprecated and buggy old function. Need to find a betteer way to rename the rule.
+Function RenamePaSecurityRule #This function needs re-written, it relies on a deprecated and buggy old function. Need to find a better way to rename the rule.
 {
 	param (
     [Parameter(Mandatory=$true,valueFromPipeline=$true)][String]$ID,
@@ -3537,8 +3505,10 @@ Function RenamePaSecurityRule #This function needs re-written, it relies on a de
 
 <#
 .SYNOPSIS
-#If any non-mandatory argument is not specfied the script will default to using 'any' in the case of services, addresses, users, or zones, and none in the case of HIP-profiles, IPS profiles, and allow for the action.
-.PARAMETER 
+Add the specified NAT rule.
+.Parameter ID
+Required.
+This is the session ID of the firewall you wish to run this command on. You can find the ID to firewall mapping by running the "Get-PaloAltoManagementSession" command.
 
 .PARAMETER 
 	
@@ -3710,15 +3680,13 @@ Function Add-PaNATRule
 
 <#
 .SYNOPSIS
-
-.PARAMETER 
-
-.PARAMETER 
-	
-.PARAMETER 
-	
-
-
+Remove the specified NAT rule from the candidate configuration.
+.Parameter ID
+Required.
+This is the session ID of the firewall you wish to run this command on. You can find the ID to firewall mapping by running the "Get-PaloAltoManagementSession" command.
+.Parameter RuleName
+Required.
+The name of the NAT rule to remove.
 #>
 Function Remove-PaNATRule {
 	param (
@@ -3784,15 +3752,25 @@ This code is no longer needed. It was buggy and has been replaced by the functio
 
 <#
 .SYNOPSIS
-
-.PARAMETER 
-
-.PARAMETER 
-	
-.PARAMETER 
-	
-
-
+Move the specified NAT rule up or down in the rule list.
+.Parameter ID
+Required.
+This is the session ID of the firewall you wish to run this command on. You can find the ID to firewall mapping by running the "Get-PaloAltoManagementSession" command.
+.Parameter RuleToMove
+Required.
+The rule that you wish to move.
+.Parameter MoveToTop
+Optional.
+Move the rule to the top of the rule list.
+.Parameter MoveToBottom
+Optional.
+Move the rule to the bottom of the rule list.
+.Parameter MoveAfterRule
+Optional.
+Use this parameter to specify the rule name to move the "RuleToMove" below.
+.Parameter MoveBeforeRule
+Optional.
+Use this parameter to specify the rule name to move the "RuleToMove" above.
 #>
 Function Move-PaNATRule
 {
@@ -3834,7 +3812,9 @@ Function Move-PaNATRule
 <#
 .SYNOPSIS
 
-.PARAMETER 
+.Parameter ID
+Required.
+This is the session ID of the firewall you wish to run this command on. You can find the ID to firewall mapping by running the "Get-PaloAltoManagementSession" command.
 
 .PARAMETER 
 	
@@ -3887,36 +3867,32 @@ Function RenamePaNatRule #This function needs re-written, it relies on a depreca
 
 <#
 .SYNOPSIS
-This function currently only support rolling back to the running configuration.
-.PARAMETER 
-
-.PARAMETER 
-	
-.PARAMETER 
-	
-
+Roll back the candidate configuration to the specified configuration version. This function currently only supports rolling back to the running configuration. Changes are only applied to the candidate configuration.
+.Parameter ID
+Required.
+This is the session ID of the firewall you wish to run this command on. You can find the ID to firewall mapping by running the "Get-PaloAltoManagementSession" command.
 
 #>
 Function Revert-PaloAltoConfiguration
 {
 	param (
-	[Parameter(Mandatory=$true,valueFromPipeline=$true)][String]$ID,
-	[Parameter(Mandatory=$false,valueFromPipeline=$true)][Switch]$RunningConfig
+	[Parameter(Mandatory=$true,valueFromPipeline=$true)][String]$ID
+	#[Parameter(Mandatory=$false,valueFromPipeline=$true)][Switch]$RunningConfig
 	)
 	if(!$PaloAltoManagementSessionTable.findSessionByID($ID))
 	{
 		throw ('This session ID does not exist, you must create a session for this firewall or use an existing session. Check existing sessions using "Get-PaloAltoSession".')
 	}
 	#Set RevertoConfig to be empty.
-	$RevertToConfig = ''
-	if ($RunningConfig)
-	{
+	#$RevertToConfig = ''
+	#if ($RunningConfig)
+	#{
 		$RevertToConfig = 'running-config.xml' 
-	}
-	if ($RevertToConfig -eq '')
-	{
-		throw  "No config to revert to, the script will do nothing. Currently this commandlet only supports reverting to the running config."
-	}
+	#}
+	#if ($RevertToConfig -eq '')
+	#{
+	#	throw  "No config to revert to, the script will do nothing. Currently this commandlet only supports reverting to the running config."
+	#}
 	#Revert the configuration.
 	$result = [xml]($PaloAltoModuleWebClient.downloadstring("https://" + $PaloAltoManagementSessionTable.findSessionByID($ID).Hostname + "/api/?type=op&cmd=<load><config><from>" + $RevertToConfig + "</from></config></load>&key=" + (GetPaAPIKeyClearText)))
 	ReturnPaAPIErrorIfError($result) #This function checks for an error from the firewall and throws it if there is one.
@@ -4276,15 +4252,13 @@ Function Update-PaServiceObject
 
 <#
 .SYNOPSIS
-
-.PARAMETER 
-
-.PARAMETER 
-	
-.PARAMETER 
-	
-
-
+Remove a service object from the candidate configuration.
+.Parameter ID
+Required.
+This is the session ID of the firewall you wish to run this command on. You can find the ID to firewall mapping by running the "Get-PaloAltoManagementSession" command.
+.Parameter ServiceName
+Required.
+The name of the service object you wish to delete.
 #>
 Function Remove-PaServiceObject
 {
@@ -4373,16 +4347,13 @@ Function Add-PaAddressGroup
 
 <#
 .SYNOPSIS
-Currently only works with static groups.
-
-.PARAMETER  
-
-.PARAMETER 
-	
-.PARAMETER 
-	
-
-
+Remove an address group from the candidate configuration.
+.Parameter ID
+Required.
+This is the session ID of the firewall you wish to run this command on. You can find the ID to firewall mapping by running the "Get-PaloAltoManagementSession" command.
+.Parameter AddressGroupName
+Required.
+The name of the address group you wish to delete.
 #>
 Function Remove-PaAddressGroup
 {
@@ -4464,16 +4435,13 @@ Function Add-PaServiceGroup
 
 <#
 .SYNOPSIS
-Currently only works with static groups.
-
-.PARAMETER  
-
-.PARAMETER 
-	
-.PARAMETER 
-	
-
-
+Remove a service group from the candidate configuration.
+.Parameter ID
+Required.
+This is the session ID of the firewall you wish to run this command on. You can find the ID to firewall mapping by running the "Get-PaloAltoManagementSession" command.
+.Parameter AddressGroupName
+Required.
+The name of the service group you wish to delete.
 #>
 Function Remove-PaServiceGroup
 {
@@ -4498,16 +4466,13 @@ Function Remove-PaServiceGroup
 
 <#
 .SYNOPSIS
-
-
-.PARAMETER  
-
-.PARAMETER 
-	
-.PARAMETER 
-	
-
-
+Direct the firewall to download the specified PANOS version.
+.Parameter ID
+Required.
+This is the session ID of the firewall you wish to run this command on. You can find the ID to firewall mapping by running the "Get-PaloAltoManagementSession" command.
+.Parameter SoftwareVersion
+Required.
+This is the PANOS version you wish to download. Specify it in the format x.y.z . Example for PANOS 7.0.15 specify "7.0.15"
 #>
 Function Download-PaPANOSVersion{
 	param (
@@ -4528,22 +4493,19 @@ Function Download-PaPANOSVersion{
 
 <#
 .SYNOPSIS
-
-
-.PARAMETER  
-
-.PARAMETER 
-	
-.PARAMETER 
-	
-
-
+Direct the firewall to install the specified PANOS version. The output of this command contains the software download jobID so you can watch it's progress with the Get-Pajob -JobID <ID> command 
+.Parameter ID
+Required.
+This is the session ID of the firewall you wish to run this command on. You can find the ID to firewall mapping by running the "Get-PaloAltoManagementSession" command.
+.Parameter SoftwareVersion
+Required.
+This is the PANOS version you wish to install. Specify it in the format x.y.z . Example for PANOS 7.0.15 specify "7.0.15"
 #>
 Function Install-PaPANOSVersion{
 	param (
     [Parameter(Mandatory=$true,valueFromPipeline=$true)][String]$ID,
-	[Parameter(Mandatory=$true,valueFromPipeline=$true)][String]$SoftwareVersion,
-	[Parameter(Mandatory=$false,valueFromPipeline=$true)][Switch]$ReturnRawData
+	[Parameter(Mandatory=$true,valueFromPipeline=$true)][String]$SoftwareVersion
+	#[Parameter(Mandatory=$false,valueFromPipeline=$true)][Switch]$ReturnRawData
     )
 	if((!$PaloAltoManagementSessionTable.findSessionByID($ID)) -or (!$PaloAltoManagementSessionTable))
 	{
@@ -4708,7 +4670,7 @@ Function Add-PaUserIDMapping{
 #####################################################################################################################################################################
 <#
 .SYNOPSIS
-This function returns a formatted error of information retrieve from the API if there was an error. Otherwise the script returns false. 
+This function returns a formatted error of information retrieved from the API if there was an error. Otherwise the script returns nothing. 
 .PARAMETER 
 
 .PARAMETER 
@@ -4806,7 +4768,7 @@ function findPaWebCallErrorCode
 
 <#
 .SYNOPSIS
-Returns a list of addresses and ports it finds.
+Returns a list of addresses and ports it finds. Input can be a full URL or just an ip address or IP and port.
 .PARAMETER 
 
 .PARAMETER 
