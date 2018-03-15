@@ -1564,16 +1564,37 @@ Function Get-PaAddressObjects {
 		Add-Member -InputObject $parsedAddress -MemberType NoteProperty -Name 'Address Name' -Value $address.name #Service Name
 		if ($address.fqdn)
 		{
-			Add-Member -InputObject $parsedAddress -MemberType NoteProperty -Name 'fqdn' -Value $address.fqdn #Add fqdn Information
+			if ($address.fqdn.'#text')
+			{
+				Add-Member -InputObject $parsedAddress -MemberType NoteProperty -Name 'fqdn' -Value $address.fqdn.'#text' #Add fqdn Information
+			}
+			else
+			{
+				Add-Member -InputObject $parsedAddress -MemberType NoteProperty -Name 'fqdn' -Value $address.fqdn #Add fqdn Information
+			}
 		}
 		if ($address.'ip-netmask')
 		{
-			Add-Member -InputObject $parsedAddress -MemberType NoteProperty -Name 'ip-netmask' -Value $address.'ip-netmask' #Add ip-netmask information
+			if ($address.'ip-netmask'.'#text')
+			{
+				Add-Member -InputObject $parsedAddress -MemberType NoteProperty -Name 'ip-netmask' -Value $address.'ip-netmask'.'#text' #Add ip-netmask information
+			}
+			else
+			{
+				Add-Member -InputObject $parsedAddress -MemberType NoteProperty -Name 'ip-netmask' -Value $address.'ip-netmask' #Add ip-netmask information
+			}
 		}
 		if ($address.'ip-range')
 		{
-			Write-Debug 'Adding IP-Range.'
-			Add-Member -InputObject $parsedAddress -MemberType NoteProperty -Name 'ip-range' -Value $address.'ip-range' #Add ip range information
+			if ($address.'ip-range'.'#text')
+			{
+				Add-Member -InputObject $parsedAddress -MemberType NoteProperty -Name 'ip-range' -Value $address.'ip-range'.'#text' #Add ip range information
+			}
+			else
+			{
+				Write-Debug 'Adding IP-Range.'
+				Add-Member -InputObject $parsedAddress -MemberType NoteProperty -Name 'ip-range' -Value $address.'ip-range' #Add ip range information
+			}
 		}
 		#Add the object to the result array list.
 		[void]$result.Add($parsedAddress)
@@ -2922,8 +2943,38 @@ Specify a source user or comma seperated list of users for this rule to match.
 Optional.
 Specify a description for this rule.
 .Parameter Action
-Optional.
+Required.
 Specify the action to be applied for traffic that matches this rule. examples of some actions are: "allow" , "deny", and "drop". The supported actions depend on your PANOS version.
+.Parameter IPSGroup
+Optional.
+Specifies the IPS (Security Profile Group) group that will be applied for this rule
+.Parameter NoIPS
+Optional.
+Specifies that you no IPS profiles of IPS groups (Securit Profiles or Security Groups) will be applied to the rule.
+.Parameter IPSProfiles
+Optional.
+Specifies that you will use at least one of the IPSProfile arguments to specify at least one IPS Profile (Security Profile) to be applied to this rule.
+.Parameter URLFilteringIPSProfile
+Optional.
+Specifies the URL Filtering IPS Profile (Security Profile) to be applied to this rule. This must be used with the -IPSProfiles switch.
+.Parameter FileBlockingIPSProfile
+Optional.
+Specifies the FileBlocking IPS Profile (Security Profile) to be applied to this rule. This must be used with the -IPSProfiles switch.
+.Parameter VirusIPSProfile
+Optional.
+Specifies the Virus IPS Profile (Security Profile) to be applied to this rule. This must be used with the -IPSProfiles switch.
+.Parameter SpywareIPSProfile
+Optional.
+Specifies the Spyware IPS Profile (Security Profile) to be applied to this rule. This must be used with the -IPSProfiles switch.
+.Parameter VulnerabilityIPSProfile
+Optional.
+Specifies the Vulnerability IPS Profile (Security Profile) to be applied to this rule. This must be used with the -IPSProfiles switch.
+.Parameter WildfireIPSProfile
+Optional.
+Specifies the URL Filtering IPS Profile (Security Profile) to be applied to this rule. This must be used with the -IPSProfiles switch.
+.Parameter DataFilteringIPSProfile
+Optional.
+Specifies the Data Filtering IPS Profile (Security Profile) to be applied to this rule. This must be used with the -IPSProfiles switch.
 #>
 Function Add-PaSecurityRule {
 	param (
@@ -2989,6 +3040,10 @@ Function Add-PaSecurityRule {
 	{
 		#Let the user know this and then don't do anything.
 		throw "The script was requested to configure IPS profiles but there were no profiles specified. The rule was not added."
+	}
+	elseif(!$IPSProfiles -and ($URLFilteringIPSProfile -or $FileBlockingIPSProfile -or $VirusIPSProfile -or $SpywareIPSProfile -or $VulnerabilityIPSProfile -or $WildfireIPSProfile -or $DataFilteringIPSProfile))
+	{
+		throw 'You must use the -IPSProfiles switch when specifying an IPS profile to use for the rule.'
 	}
 	elseif (!$Action)
 	{
@@ -3962,15 +4017,25 @@ Function Revert-PaloAltoConfiguration
 
 <#
 .SYNOPSIS
-
-.PARAMETER 
-
-.PARAMETER 
-	
-.PARAMETER 
-	
-
-
+Adds a static address object to the candidate configuration.
+.Parameter ID
+Required.
+This is the session ID of the firewall you wish to run this command on. You can find the ID to firewall mapping by running the "Get-PaloAltoManagementSession" command.
+.Parameter AddressName
+Required. 
+Specifies the name of the address object.
+.Parameter FQDN
+Optional. 
+Specify the fully qualified domain name for the address object.
+.Parameter IpRange
+Optional. 
+Specify the IP range for this address object. Example: '192.168.0.1-192.168.0.50'
+.Parameter IpNetmask
+Optional. 
+Specify an IP/Netmask combination for this address object. Example: '192.168.0.0/24'
+.Parameter Description
+Optional. 	
+Specifies a description for the address object.
 #>
 Function Add-PaAddressObject
 {
@@ -4039,19 +4104,29 @@ Function Add-PaAddressObject
 
 <#
 .SYNOPSIS
-#This is essentially the same function as Add-PaAddressObject, just don't check if an object already exists.
-
-.PARAMETER 
-
-.PARAMETER 
-	
-.PARAMETER 
-	
-
-
+Updates an existing address object. More specifically it overwrites an existing address object with the parameters you specify in this command.
+.Parameter ID
+Required.
+This is the session ID of the firewall you wish to run this command on. You can find the ID to firewall mapping by running the "Get-PaloAltoManagementSession" command.
+.Parameter AddressName
+Required. 
+Specifies the name of the address object.
+.Parameter FQDN
+Optional. 
+Specify the fully qualified domain name for the address object.
+.Parameter IpRange
+Optional. 
+Specify the IP range for this address object. Example: '192.168.0.1-192.168.0.50'
+.Parameter IpNetmask
+Optional. 
+Specify an IP/Netmask combination for this address object. Example: '192.168.0.0/24'
+.Parameter Description
+Optional. 	
+Specifies a description for the address object.
 #>
 Function Update-PaAddressObject
 {
+	#This is essentially the same function as Add-PaAddressObject, just don't check if an object already exists.
 	param (
     [Parameter(Mandatory=$true,valueFromPipeline=$true)][String]$ID,
 	[Parameter(Mandatory=$false,valueFromPipeline=$true)][String]$AddressName,
@@ -4113,7 +4188,7 @@ Function Update-PaAddressObject
 	#Unlike with the rulebase rule additions you cannot specify the entry to add for an address object in the URL and must build the XML string to contain it.
 	#Since set can modify configuration values we use it here.
 	$url = ("https://" + $PaloAltoManagementSessionTable.findSessionByID($ID).Hostname + "/api/?type=config&action=set&xpath=/config/devices/entry[@name='" + $PaloAltoManagementSessionTable.findSessionByID($ID).DeviceName + "']/vsys/entry[@name='"+ $PaloAltoManagementSessionTable.findSessionByID($ID).VirtualSystem + "']/address&element=" + $xmlString + "&key="  + (GetPaAPIKeyClearText))
-	Write-Debug ('The url called is: ' + $url)
+	Write-Debug ('The url called is: ' + $url) #This will output the apikey to the powershell window as part of the URL string.
 	$response = [xml]($PaloAltoModuleWebClient.downloadstring($url))
 	ReturnPaAPIErrorIfError($response) #This function checks for an error from the firewall and throws it if there is one.
 	Write-Host "The address object was modified successfully."
@@ -4121,15 +4196,13 @@ Function Update-PaAddressObject
 
 <#
 .SYNOPSIS
-
-.PARAMETER 
-
-.PARAMETER 
-	
-.PARAMETER 
-	
-
-
+Removes the specified address object.
+.Parameter ID
+Required.
+This is the session ID of the firewall you wish to run this command on. You can find the ID to firewall mapping by running the "Get-PaloAltoManagementSession" command.
+.Parameter AddressName
+Required. 
+Specifies the name of the address object.
 #>
 Function Remove-PaAddressObject
 {
@@ -4342,16 +4415,20 @@ Function Remove-PaServiceObject
 
 <#
 .SYNOPSIS
+Adds the specfied address group to the candidate configuration.
 Currently only works with static groups.
-
-.Members 
+.Parameter ID
+Required.
+This is the session ID of the firewall you wish to run this command on. You can find the ID to firewall mapping by running the "Get-PaloAltoManagementSession" command.
+.Parameter AddressGroupName
+Required.
+Specifies the name of the address group to create.
+.Parameter Members
+Required. 
 A comma seperated string containing the names of address objects or other address groups this group should contain.
-.PARAMETER 
-	
-.PARAMETER 
-	
-
-
+.Description
+Optional.
+Specify a description for this address group.
 #>
 Function Add-PaAddressGroup
 {
