@@ -2889,8 +2889,41 @@ Adds the specified security rule to the firewall.
 .Parameter ID
 Required.
 This is the session ID of the firewall you wish to run this command on. You can find the ID to firewall mapping by running the "Get-PaloAltoManagementSession" command.
-
-
+.Parameter RuleName
+Required.
+The name of the rule you wish to add.
+.Parameter Application
+Required.
+Specify the applications to allow. This can be a single application, a comma seperated list of applications, or the work 'any' for all applications.
+.Parameter Service
+Required.
+Specify the service object(s) or service group(s) for this rule. To match multiple services use a comma seperated list of service objects and service groups. To match any service you may use the word 'any'.
+.Parameter SourceAddress
+Required.
+Specify the source address for this rule. To allow multiple source addresses use a comma seperated list of addresses and/or address/netmask entries. To match any source address you may use the word 'any'.
+.Parameter DestinationAddress
+Required.
+Specify the destination address for this rule. To allow multiple destination addresses use a comma seperated list of addresses and/or address/netmask entries. To match any destination address you may use the word 'any'.
+.Parameter SourceZone
+Required.
+Specify the source zone for this rule. To allow multiple source zones use a comma seperated list of zone names. To match any source zone you may use the word 'any'.
+.Parameter DestinationZone
+Required.
+Specify the destination zone for this rule. To allow multiple destination zones use a comma seperated list of zone names. To match any destination zone you may use the word 'any'.
+.Parameter NegateSourceAddress
+Optional.
+Specify this switch to make this rule match traffic sourced from addresses that were not specified in the SourceAddress parameter.
+.Parameter NegateDestinationAddress
+Specify this switch to make this rule match traffic destined to addresses that were not specified in the DestinationAddress parameter.
+.Parameter User
+Optional.
+Specify a source user or comma seperated list of users for this rule to match.
+.Parameter Description
+Optional.
+Specify a description for this rule.
+.Parameter Action
+Optional.
+Specify the action to be applied for traffic that matches this rule. examples of some actions are: "allow" , "deny", and "drop". The supported actions depend on your PANOS version.
 #>
 Function Add-PaSecurityRule {
 	param (
@@ -3509,13 +3542,45 @@ Add the specified NAT rule.
 .Parameter ID
 Required.
 This is the session ID of the firewall you wish to run this command on. You can find the ID to firewall mapping by running the "Get-PaloAltoManagementSession" command.
-
-.PARAMETER 
-	
-.PARAMETER 
-	
-
-
+.Parameter RuleName
+Required.
+The name of the rule you wish to add.
+.Parameter BiDirectional
+Optional.
+Specify this switch if the rule should be bi-directional.
+.Parameter Service
+Required.
+Specify the service object or service group for this rule. To match any service you may use the word 'any'.
+.Parameter SourceAddress
+Required.
+Specify the source address for this rule. To match any source address you may use the word 'any'.
+.Parameter DestinationAddress
+Required.
+Specify the destination address for this rule. To match any destination address you may use the word 'any'.
+.Parameter SourceZone
+Required.
+Specify the source zone for this rule. To match any source zone you may use the word 'any'.
+.Parameter DestinationZone
+Required.
+Specify the destination zone for this rule. This must be a specific zone. The use of 'any' for this parameter is not supported.
+.Parameter Description
+Optional.
+Specify a description for this rule.
+.Parameter NATDestinationAddress
+Optional.
+Specify the NAT destination address for traffic that matches this rule. Currently this module only supports a static destination address.
+.Parameter NATStaticSourceAddress
+Optional.
+Specify the NAT source address for traffic that matches this rule. Currently this module only supports a static source address.
+.Parameter NATDestinationPort
+Optional.
+Specify the NAT destination port. This must be a number not a service group or service object.
+.Parameter DestinationInterface
+Optional.
+Specify the destination interface to match of the original packet for this NAT rule.
+.Parameter Disabled
+Optional.
+Specify that this rule is to be disabled.
 #>
 Function Add-PaNATRule 
 {
@@ -3559,6 +3624,10 @@ Function Add-PaNATRule
 	elseif(!$DestinationAddress)
 	{
 		throw 'You must specify a destination address. The word "any" can be used to mean all addresses. The rule was not added.'
+	}
+	elseif(!$Service)
+	{
+		throw 'You must specify a service object or service group address. The word "any" can be used to mean any service. The rule was not added.'
 	}
 	elseif(!$SourceZone)
 	{
@@ -3665,16 +3734,6 @@ Function Add-PaNATRule
 	ReturnPaAPIErrorIfError($response) #This function checks for an error from the firewall and throws it if there is one.
 
 	Write-Host "The rule was added successfully."
-
-	Remove-Variable -Name response
-	if ($xmlString)
-	{
-		Remove-Variable -Name xmlString
-	}
-	if ($entry)
-	{
-		Remove-Variable -Name entry
-	}
 }
 
 

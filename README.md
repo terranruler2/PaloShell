@@ -137,3 +137,8 @@ Update-PaAddressObject
 
 Update-PaServiceObject
 
+
+
+More Information
+====
+Please see the Wiki for more information.
