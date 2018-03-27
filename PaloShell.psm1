@@ -4273,7 +4273,7 @@ Function Add-PaServiceObject
 	$xmlString = ('<entry name="' + $ServiceName + '">')
 	if ($TCP)
 	{
-		Write-Debug ('The address object will be created as a TCP object.')
+		Write-Debug ('The service object will be created as a TCP object.')
 		$xmlString += ('<protocol><tcp><port>' + $port + '</port></tcp></protocol>')
 		if ($Description)
 		{
@@ -4282,7 +4282,7 @@ Function Add-PaServiceObject
 	}
 	if ($UDP)
 	{
-		Write-Debug ('The address object will be created as a UDP object.')
+		Write-Debug ('The service object will be created as a UDP object.')
 		$xmlString += ('<protocol><udp><port>' + $port + '</port></udp></protocol>')
 		if ($Description)
 		{
@@ -4355,7 +4355,7 @@ Function Update-PaServiceObject
 	$xmlString = ('<entry name="' + $ServiceName + '">')
 	if ($TCP)
 	{
-		Write-Debug ('The address object will be modified as a TCP object.')
+		Write-Debug ('The service object will be modified as a TCP object.')
 		$xmlString += ('<protocol><tcp><port>' + $port + '</port></tcp></protocol>')
 		if ($Description)
 		{
@@ -4364,7 +4364,7 @@ Function Update-PaServiceObject
 	}
 	if ($UDP)
 	{
-		Write-Debug ('The address object will be modified as a UDP object.')
+		Write-Debug ('The service object will be modified as a UDP object.')
 		$xmlString += ('<protocol><udp><port>' + $port + '</port></udp></protocol>')
 		if ($Description)
 		{
@@ -4478,7 +4478,7 @@ Function Add-PaAddressGroup
 	Write-Debug ('The url called is: ' + $url)
 	$response = [xml]($PaloAltoModuleWebClient.downloadstring($url))
 	ReturnPaAPIErrorIfError($response) #This function checks for an error from the firewall and throws it if there is one.
-	Write-Host "The address object was created successfully."
+	Write-Host "The address group was created successfully."
 }
 
 <#
@@ -4566,7 +4566,7 @@ Function Add-PaServiceGroup
 	Write-Debug ('The url called is: ' + $url)
 	$response = [xml]($PaloAltoModuleWebClient.downloadstring($url))
 	ReturnPaAPIErrorIfError($response) #This function checks for an error from the firewall and throws it if there is one.
-	Write-Host "The address object was created successfully."
+	Write-Host "The service group was created successfully."
 }
 
 <#
