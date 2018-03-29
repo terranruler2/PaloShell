@@ -554,7 +554,7 @@ Function getPaApiKey {
 	}
 	Catch
 	{
-		#If we get a 403 here it means the username and password combination i s incorrect.
+		#If we get a 403 here it means the username and password combination is incorrect.
 		throw $_
 		#throw ('The web request failed with the following error: ' + $_.Exception.Message)
     }
@@ -2698,91 +2698,35 @@ Function UpdatePaSecurityRule {
 	#The following if's check to see which fields in the rule need updating.
 	if ($SourceZone)
 	{
-		$xmlString = ''
-		foreach ($entry in $SourceZone.Split(','))
-		{
-			$xmlString += "<member>"
-			$xmlString += $entry
-			$xmlString += "</member>"
-		}
-		($rule.entry.from).InnerXml = $xmlString
+		($rule.entry.from).InnerXml = TurnCSVListIntoXMLString -xmlNodes "member" -list $SourceZone
 	}
 	if ($DestinationZone)
 	{
-		$xmlString = ''
-		foreach ($entry in $DestinationZone.Split(','))
-		{
-			$xmlString += "<member>"
-			$xmlString += $entry
-			$xmlString += "</member>"
-		}
-		($rule.entry.to).InnerXml = $xmlString
+		($rule.entry.to).InnerXml = TurnCSVListIntoXMLString -xmlNodes "member" -list $DestinationZone
 	}
 	if ($SourceAddress)
 	{
-		$xmlString = ''
-		foreach ($entry in $SourceAddress.Split(','))
-		{
-			$xmlString += "<member>"
-			$xmlString += $entry
-			$xmlString += "</member>"
-		}
-		($rule.entry.source).InnerXml = $xmlString
+		($rule.entry.source).InnerXml = TurnCSVListIntoXMLString -xmlNodes "member" -list $SourceAddress
 	}
 	if ($DestinationAddress)
 	{
-		$xmlString = ''
-		foreach ($entry in $DestinationAddress.Split(','))
-		{
-			$xmlString += "<member>"
-			$xmlString += $entry
-			$xmlString += "</member>"
-		}
-		($rule.entry.destination).InnerXml = $xmlString
+		($rule.entry.destination).InnerXml = TurnCSVListIntoXMLString -xmlNodes "member" -list $DestinationAddress
 	}
 	if ($User)
 	{
-		$xmlString = ''
-		foreach ($entry in $User.Split(','))
-		{
-			$xmlString += "<member>"
-			$xmlString += $entry
-			$xmlString += "</member>"
-		}
-		($rule.entry.'source-user').InnerXml = $xmlString
+		($rule.entry.'source-user').InnerXml = TurnCSVListIntoXMLString -xmlNodes "member" -list $User
 	}
 	if ($UrlCategory)
 	{
-		$xmlString = ''
-		foreach ($entry in $UrlCategory.Split(','))
-		{
-			$xmlString += "<member>"
-			$xmlString += $entry
-			$xmlString += "</member>"
-		}
-		($rule.entry.category).InnerXml = $xmlString
+		($rule.entry.category).InnerXml = TurnCSVListIntoXMLString -xmlNodes "member" -list $UrlCategory
 	}
 	if ($Application)
 	{
-		$xmlString = ''
-		foreach ($entry in $Application.Split(','))
-		{
-			$xmlString += "<member>"
-			$xmlString += $entry
-			$xmlString += "</member>"
-		}
-		($rule.entry.application).InnerXml = $xmlString
+		($rule.entry.application).InnerXml = TurnCSVListIntoXMLString -xmlNodes "member" -list $Application
 	}
 	if ($Service)
 	{
-		$xmlString = ''
-		foreach ($entry in $Service.Split(','))
-		{
-			$xmlString += "<member>"
-			$xmlString += $entry
-			$xmlString += "</member>"
-		}
-		($rule.entry.service).InnerXml = $xmlString
+		($rule.entry.service).InnerXml = TurnCSVListIntoXMLString -xmlNodes "member" -list $Service
 	}
 	if ($Action)
 	{
@@ -2814,7 +2758,7 @@ Function UpdatePaSecurityRule {
 			($rule.entry).RemoveChild($node)
 		}
 			#Set the IPS group.
-			($rule.entry).InnerXML += '<profile-setting><group><member>' + $IPSGroup + '</member></group></profile-setting>'
+			($rule.entry).InnerXML += TurnCSVListIntoXMLString -xmlNodes 'profile-setting,group,member' -list $IPSGroup
 	}
 	if ($IPSProfiles)
 	{
@@ -2834,45 +2778,31 @@ Function UpdatePaSecurityRule {
 			$xmlString = '<profile-setting><profiles>'
 			if ($URLFilteringIPSProfile)
 			{
-				$xmlString += '<url-filtering><member>'
-				$xmlString += $URLFilteringIPSProfile
-				$xmlString += '</member></url-filtering>'
+				$xmlString += TurnCSVListIntoXMLString -xmlNodes "url-filtering,member" -list $URLFilteringIPSProfile
 			}
 			if ($FileBlockingIPSProfile)
 			{
-				$xmlString += '<file-blocking><member>'
-				$xmlString += $FileBlockingIPSProfile
-				$xmlString += '</member></file-blocking>'
+				$xmlString += TurnCSVListIntoXMLString -xmlNodes "file-blocking,member" -list $FileBlockingIPSProfile
 			}
 			if ($VirusIPSProfile)
 			{
-				$xmlString += '<virus><member>'
-				$xmlString += $VirusIPSProfile
-				$xmlString += '</member></virus>'
+				$xmlString += TurnCSVListIntoXMLString -xmlNodes "virus,member" -list $VirusIPSProfile
 			}
 			if ($SpywareIPSProfile)
 			{
-				$xmlString += '</spyware><member>'
-				$xmlString += $SpywareIPSProfile
-				$xmlString += '</member></spyware>'
+				$xmlString += TurnCSVListIntoXMLString -xmlNodes "spyware,member" -list $SpywareIPSProfile
 			}
 			if ($VulnerabilityIPSProfile)
 			{
-				$xmlString += '<vulnerability><member>'
-				$xmlString += $VulnerabilityIPSProfile
-				$xmlString += '</member></vulnerability>'
+				$xmlString += TurnCSVListIntoXMLString -xmlNodes "vulnerability,member" -list $VulnerabilityIPSProfile
 			}
 			if ($WildfireIPSProfile)
 			{
-				$xmlString += '<wildfire-analysis><member>'
-				$xmlString += $WildfireIPSProfile
-				$xmlString += '</member></wildfire-analysis>'
+				$xmlString += TurnCSVListIntoXMLString -xmlNodes "wildfire-analysis,member" -list $WildfireIPSProfile
 			}
 			if ($DataFilteringIPSProfile)
 			{
-				$xmlString += '<data-filtering><member>'
-				$xmlString += $DataFilteringIPSProfile
-				$xmlString += '</member></data-filtering>'
+				$xmlString += TurnCSVListIntoXMLString -xmlNodes "data-filtering,member" -list $DataFilteringIPSProfile
 			}
 			$xmlString += '</profiles></profile-setting>'
 			($rule.entry).InnerXML += $xmlString
@@ -2903,6 +2833,7 @@ Function UpdatePaSecurityRule {
 		Remove-Variable -Name entry
 	}	
 }
+
 
 <#
 .SYNOPSIS
@@ -3061,157 +2992,97 @@ Function Add-PaSecurityRule {
 	#Set negate source if specified.
 	if ($NegateSourceAddress)
 	{
-		$xmlString += '<negate-source>yes</negate-source>'
+		$xmlString += TurnCSVListIntoXMLString -xmlNodes "negate-source" -list 'yes'
 	}
 	#Set negate destination if specified.
 	if ($NegateDestinationAddress)
 	{
-		$xmlString += '<negate-destination>yes</negate-destination>'
+		$xmlString += TurnCSVListIntoXMLString -xmlNodes "negate-destination" -list 'yes'
 	}
 	#Build the source zone config.
 	$xmlString += '<from>'
-	foreach ($entry in $SourceZone.Split(','))
-	{
-		$xmlString += "<member>"
-		$xmlString += $entry
-		$xmlString += "</member>"
-	}
+	$xmlString += TurnCSVListIntoXMLString -xmlNodes "member" -list $SourceZone
 	$xmlString += '</from>'
 	#Build the Destination zone config.
 	$xmlString += '<to>'
-	foreach ($entry in $DestinationZone.Split(','))
-	{
-		$xmlString += "<member>"
-		$xmlString += $entry
-		$xmlString += "</member>"
-	}
+	$xmlString += TurnCSVListIntoXMLString -xmlNodes "member" -list $DestinationZone
 	$xmlString += '</to>'
 	#Build the Source address config.
 	$xmlString += '<source>'
-	foreach ($entry in $SourceAddress.Split(','))
-	{
-		$xmlString += "<member>"
-		$xmlString += $entry
-		$xmlString += "</member>"
-	}
+	$xmlString += TurnCSVListIntoXMLString -xmlNodes "member" -list $SourceAddress
 	$xmlString += '</source>'
 	#Build the Destination address config.
 	$xmlString += '<destination>'
-	foreach ($entry in $DestinationAddress.Split(','))
-	{
-		$xmlString += "<member>"
-		$xmlString += $entry
-		$xmlString += "</member>"
-	}
+	$xmlString += TurnCSVListIntoXMLString -xmlNodes "member" -list $DestinationAddress
 	$xmlString += '</destination>'
 	#Build the user config. If none is specified leave it out.
 	if ($User)
 	{
 		$xmlString += '<source-user>'
-		foreach ($entry in $User.Split(','))
-		{
-			$xmlString += "<member>"
-			$xmlString += $entry
-			$xmlString += "</member>"
-		}
+		$xmlString += TurnCSVListIntoXMLString -xmlNodes "member" -list $User
 		$xmlString += '</source-user>'
 	}
 	#Build the URL category config.
 	$xmlString += '<category>'
 	if ($UrlCategory)
 	{
-		foreach ($entry in $UrlCategory.Split(','))
-		{
-			$xmlString += "<member>"
-			$xmlString += $entry
-			$xmlString += "</member>"
-		}
+		$xmlString += TurnCSVListIntoXMLString -xmlNodes "member" -list $UrlCategory
 	}else
 	{
-		$xmlString += "<member>"
-		$xmlString += 'any'
-		$xmlString += "</member>"
+		$xmlString += TurnCSVListIntoXMLString -xmlNodes "member" -list 'any'
 	}
 	$xmlString += '</category>'
 	#Build the Application config.
 	$xmlString += '<application>'
-	foreach ($entry in $Application.Split(','))
-	{
-		$xmlString += "<member>"
-		$xmlString += $entry
-		$xmlString += "</member>"
-	}
+	$xmlString += TurnCSVListIntoXMLString -xmlNodes "member" -list $Application
 	$xmlString += '</application>'
 	#Build the Service (ports) config.
 	$xmlString += '<service>'
-	foreach ($entry in $Service.Split(','))
-	{
-		$xmlString += "<member>"
-		$xmlString += $entry
-		$xmlString += "</member>"
-	}
+	$xmlString += TurnCSVListIntoXMLString -xmlNodes "member" -list $Service
 	$xmlString += '</service>'
 	#Build the rule Action.
-	$xmlString += '<action>'
-	$xmlString +=  $Action
-	$xmlString += '</action>'
+	$xmlString += TurnCSVListIntoXMLString -xmlNodes "action" -list $Action
 	#Build the rule description, leave empty if not specified.
 	if ($Description)
 	{
 		#Set the rule description.
-		$xmlString += '<description>'
-		$xmlString +=  $Description
-		$xmlString += '</description>'
+		$xmlString += TurnCSVListIntoXMLString -xmlNodes "description" -list $Description
 	}
 	#Build the IPS configuration. If non is specified then don't create any XML.
 	if ($IPSGroup)
 	{
-			$xmlString += '<profile-setting><group><member>' + $IPSGroup + '</member></group></profile-setting>'
+			$xmlString += TurnCSVListIntoXMLString -xmlNodes "profile-settinggroupmember" -list $IPSGroup
 	}
 	if ($IPSProfiles)
 	{
 		$xmlString += '<profile-setting><profiles>'
 		if ($URLFilteringIPSProfile)
 		{
-			$xmlString += '<url-filtering><member>'
-			$xmlString += $URLFilteringIPSProfile
-			$xmlString += '</member></url-filtering>'
+			$xmlString += TurnCSVListIntoXMLString -xmlNodes "url-filtering,member" -list $URLFilteringIPSProfile
 		}
 		if ($FileBlockingIPSProfile)
 		{
-			$xmlString += '<file-blocking><member>'
-			$xmlString += $FileBlockingIPSProfile
-			$xmlString += '</member></file-blocking>'
+			$xmlString += TurnCSVListIntoXMLString -xmlNodes "file-blocking,member" -list $FileBlockingIPSProfile
 		}
 		if ($VirusIPSProfile)
 		{
-			$xmlString += '<virus><member>'
-			$xmlString += $VirusIPSProfile
-			$xmlString += '</member></virus>'
+			$xmlString += TurnCSVListIntoXMLString -xmlNodes "virus,member" -list $VirusIPSProfile
 		}
 		if ($SpywareIPSProfile)
 		{
-			$xmlString += '</spyware><member>'
-			$xmlString += $SpywareIPSProfile
-			$xmlString += '</member></spyware>'
+			$xmlString += TurnCSVListIntoXMLString -xmlNodes "spyware,member" -list $SpywareIPSProfile
 		}
 		if ($VulnerabilityIPSProfile)
 		{
-			$xmlString += '<vulnerability><member>'
-			$xmlString += $VulnerabilityIPSProfile
-			$xmlString += '</member></vulnerability>'
+			$xmlString += TurnCSVListIntoXMLString -xmlNodes "vulnerability,member" -list $VulnerabilityIPSProfile
 		}
 		if ($WildfireIPSProfile)
 		{
-			$xmlString += '<wildfire-analysis><member>'
-			$xmlString += $WildfireIPSProfile
-			$xmlString += '</member></wildfire-analysis>'
+			$xmlString += TurnCSVListIntoXMLString -xmlNodes "wildfire-analysis,member" -list $WildfireIPSProfile
 		}
 		if ($DataFilteringIPSProfile)
 		{
-			$xmlString += '<data-filtering><member>'
-			$xmlString += $DataFilteringIPSProfile
-			$xmlString += '</member></data-filtering>'
+			$xmlString += TurnCSVListIntoXMLString -xmlNodes "data-filtering,member" -list $DataFilteringIPSProfile
 		}
 		$xmlString += '</profiles></profile-setting>'
 	}
@@ -4901,6 +4772,51 @@ function findPaWebCallErrorCode
 		}
 	}
 }
+
+<#
+.SYNOPSIS
+Converts an csv list in to an XML string.
+Example1:
+If the command is run like this: ConvertCSVListIntoXMLString -xmlNodes 'member' -list 'test'
+The output will be <member>test</member>
+
+Example2:
+If the command is run like this: ConvertCSVListIntoXMLString -xmlNodes 'candle,member' -list 'test'
+The output will be <candle><member>test</member></candle>
+
+Example3:
+If the command is run like this: ConvertCSVListIntoXMLString -xmlNodes 'member' -list 'test,test1,test2'
+The output will be <member>test</member><member>test1</member><member>test2</member>
+
+Example4:
+If the command is run like this: ConvertCSVListIntoXMLString -xmlNodes 'candle,member' -list 'test,test1,test2'
+The output will be <candle><member>test</member></candle><candle><member>test1</member></candle><candle><member>test2</member></candle>
+#>
+Function ConvertCSVListIntoXMLString
+{
+	param (
+		[Parameter(Mandatory=$true,valueFromPipeline=$true)][String]$xmlNodes,
+		[Parameter(Mandatory=$false,valueFromPipeline=$true)][String]$list
+		)
+	$xmlString = ''
+	$nodeList = $xmlNodes.Split(',')
+	foreach ($entry in $list.Split(','))
+	{
+		foreach ($node in $nodeList)
+		{
+			$xmlString += ("<" + $node + ">")
+		}
+
+		$xmlString += $entry
+			
+		for ($i = $nodeList.length - 1; $i -ge 0; $i--)
+		{
+			$xmlString += ("</" + $nodeList[$i] + ">")
+		}
+	}
+	Return $xmlString
+}
+
 
 <#
 .SYNOPSIS
