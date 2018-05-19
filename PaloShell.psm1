@@ -698,7 +698,7 @@ Function Show-PaRuleHitCount {
 	if (!$ApplicationOverride -and !$Authentication -and !$Decryption -and !$Dos -and !$Nat -and !$Pbf -and !$Qos -and !$Security -and !$TunnelInspect-and !$AllRuleTypes)
 	{
 		#If we got here the user didn't specify any rules to return hitcounts for.
-		throw "You must specify a rule type to get hitcount information for."
+		throw "You must specify at least one rule type or use the -AllRuleTypes switch to get rule hitcount information."
 	}
 	#Since timestamp values are returned in unix time format from UTC time the following is run so math can be performed to return the timestamp to the user as a powershell datetime object.
 	$unixEpoch = (get-date "1/1/1970")
@@ -1122,7 +1122,7 @@ Function Get-PaSessionInformation {
 }
 <#
 .SYNOPSIS
-Returns a list of Security rules configured on the Palo Alto firewall.
+Returns a list of Security rules configured in the candidate configuration on the Palo Alto firewall.
 .Parameter ID
 Required.
 This is the session ID of the firewall you wish to run this command on. You can find the ID to firewall mapping by running the "Get-PaloAltoManagementSession" command.
@@ -1282,7 +1282,7 @@ Function Get-PaSecurityRules
 }
 <#
 .SYNOPSIS
-Returns a list of NAT rules configured on the firewall.
+Returns a list of NAT rules configured in the candidate configuration on the firewall.
 .Parameter ID
 Required.
 This is the session ID of the firewall you wish to run this command on. You can find the ID to firewall mapping by running the "Get-PaloAltoManagementSession" command.
