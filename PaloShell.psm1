@@ -30,8 +30,16 @@ if(!$RunningPowershell6)
 	}
 	Catch
 	{
-		#Create the Registry entry if needed.
-		Set-ItemProperty -Path 'HKCU:\Software\Microsoft\Internet Explorer\Main' -Name 'IE10RunOncePerInstallCompleted' -Value '1' | Out-Null
+		#Try this next command in a try in case IE isn't installed on the target system.
+		try
+		{
+			#Create the Registry entry if needed.
+			Set-ItemProperty -Path 'HKCU:\Software\Microsoft\Internet Explorer\Main' -Name 'IE10RunOncePerInstallCompleted' -Value '1' | Out-Null
+		}
+		Catch
+		{
+			#Do nothing if we got here. Silently swallow the error.
+		}
 	}
 }
 
@@ -585,8 +593,6 @@ This is the session ID of the firewall you wish to run this command on. You can 
 	
 .PARAMETER 
 	 
-
-
 #>
 Function Show-PaRunningConfig {
 	param (
@@ -2606,6 +2612,37 @@ Function Show-PaHAStatus
 		Add-Member -InputObject $returnObject -MemberType NoteProperty -Name HAPeerPreempt -Value $true
 	}
 	Add-Member -InputObject $returnObject -MemberType NoteProperty -Name HALocalStateSync -Value $haStatusResponse.response.result.group.'local-info'.'state-sync' #This variable tells us if all of the syncing is occring correctly. If it is the value will be 'Complete'
+	return $returnObject
+}
+
+<#
+.SYNOPSIS
+This command displays the Geo location of the specified IP address.
+.Parameter ID
+Required.
+This is the session ID of the firewall you wish to run this command on. You can find the ID to firewall mapping by running the "Get-PaloAltoManagementSession" command.
+.Parameter IP
+Required.
+Specifies the IP address to look up the location of.
+#>
+Function Show-PaGeoIpLocation {
+	param (
+    [Parameter(Mandatory=$true,valueFromPipeline=$true)][String]$ID,
+	[Parameter(Mandatory=$true,valueFromPipeline=$true)][Switch]$IP
+    )
+	#This function has only been tested on PANOS8.1 6-6-18
+	if(!$PaloAltoManagementSessionTable.findSessionByID($ID))
+	{
+		throw ('This session ID does not exist, you must create a session for this firewall or use an existing session. Check existing sessions using "Get-PaloAltoSession".')
+	}
+	$returnObject = New-Object psobject
+	$paResponse = [xml]($PaloAltoModuleWebClient.downloadstring("https://" + $PaloAltoManagementSessionTable.findSessionByID($ID).Hostname + "/api/?type=op&cmd=<show><location><ip>" + $IP + "</ip></location></show>&key=" + (GetPaAPIKeyClearText)))
+	ReturnPaAPIErrorIfError($paResponse) #This function checks for an error from the firewall and throws it if there is one.
+
+	Add-Member -InputObject $returnObject -MemberType NoteProperty -Name 'CountryCode' -Value $paResponse.response.result.entry.cc
+	Add-Member -InputObject $returnObject -MemberType NoteProperty -Name 'IP' -Value $paResponse.response.result.entry.ip
+	Add-Member -InputObject $returnObject -MemberType NoteProperty -Name 'CountryName' -Value $paResponse.response.result.entry.country
+
 	return $returnObject
 }
 #####################################################################################################################################################################
