@@ -23,6 +23,9 @@ else
 #The following Try Catch resolves an issue where $PaloAltoModuleWebClient.downloadstring will fail if a registry key is not set. Only do this for Windows PowerShell.
 if(!$RunningPowershell6)
 {
+	#Allow weaker protocols SSL/TLS protocols if the host system is running a newer version of dotnet. This resolves an issue where the firewall may not have a strong SSL/TLS implementation available.
+	$AllProtocols = [System.Net.SecurityProtocolType]'Ssl3,Tls,Tls11,Tls12'
+	[System.Net.ServicePointManager]::SecurityProtocol = $AllProtocols
 	try
 	{
 		#Check for the registry key.
