@@ -1403,6 +1403,153 @@ Function Show-PaActiveSessions {
 
 <#
 .SYNOPSIS
+This command retrieves a list of all predefined application ID's curently installed on the firewall via Palo Alto Content Updates.
+.Parameter ID
+Required.
+This is the session ID of the firewall you wish to run this command on. You can find the ID to firewall mapping by running the "Get-PaloAltoManagementSession" command.
+
+#>
+Function Get-PaPredefinedApplications {
+	param (
+    [Parameter(Mandatory=$true,valueFromPipeline=$true)][String]$ID
+    )
+	#This function has only been tested on PANOS8.1 6-6-18
+	if(!$PaloAltoManagementSessionTable.findSessionByID($ID))
+	{
+		throw ('This session ID does not exist, you must create a session for this firewall or use an existing session. Check existing sessions using "Get-PaloAltoSession".')
+	}
+		$paResponse = [xml]($PaloAltoModuleWebClient.downloadstring("https://" + $PaloAltoManagementSessionTable.findSessionByID($ID).Hostname + "/api/?type=config&action=get&xpath=/config/predefined/application&key=" + (GetPaAPIKeyClearText)))
+	ReturnPaAPIErrorIfError($paResponse) #This function checks for an error from the firewall and throws it if there is one.
+
+    $returnList = New-Object System.Collections.ArrayList
+    foreach ($entry in $paResponse.response.result.application.entry)
+    {
+        $application = New-Object psobject
+        Add-Member -InputObject $application -MemberType NoteProperty -Name 'ID' -Value $entry.id
+        Add-Member -InputObject $application -MemberType NoteProperty -Name 'Name' -Value $entry.name
+        Add-Member -InputObject $application -MemberType NoteProperty -Name 'OriginCountry' -Value $entry.'ori_country'
+        Add-Member -InputObject $application -MemberType NoteProperty -Name 'Category' -Value $entry.'ori_language'
+        Add-Member -InputObject $application -MemberType NoteProperty -Name 'Subcategory' -Value $entry.subcategory
+        Add-Member -InputObject $application -MemberType NoteProperty -Name 'Technology' -Value $entry.technology
+        if ($entry.'evasive-behavior'.tolower() -match 'yes')
+        {
+            Add-Member -InputObject $application -MemberType NoteProperty -Name 'EvasiveBehavior' -Value $true
+        }
+        else
+        {
+            Add-Member -InputObject $application -MemberType NoteProperty -Name 'EvasiveBehavior' -Value $false
+        }
+        if ($entry.'consume-big-bandwidth'.tolower() -match 'yes')
+        {
+            Add-Member -InputObject $application -MemberType NoteProperty -Name 'HighBandwidthConsumption' -Value $true
+        }
+        else
+        {
+            Add-Member -InputObject $application -MemberType NoteProperty -Name 'HighBandwidthConsumption' -Value $false
+        }
+        if ($entry.'used-by-malware'.tolower() -match 'yes')
+        {
+            Add-Member -InputObject $application -MemberType NoteProperty -Name 'UsedByMalware' -Value $true
+        }
+        else
+        {
+            Add-Member -InputObject $application -MemberType NoteProperty -Name 'UsedByMalware' -Value $false
+        }
+        if ($entry.'able-to-transfer-file'.tolower() -match 'yes')
+        {
+            Add-Member -InputObject $application -MemberType NoteProperty -Name 'AbleToTransferFile' -Value $true
+        }
+        else
+        {
+            Add-Member -InputObject $application -MemberType NoteProperty -Name 'AbleToTransferFile' -Value $false
+        }
+        if ($entry.'has-known-vulnerability'.tolower() -match 'yes')
+        {
+            Add-Member -InputObject $application -MemberType NoteProperty -Name 'KnownVulnerabilities' -Value $true
+        }
+        else
+        {
+            Add-Member -InputObject $application -MemberType NoteProperty -Name 'KnownVulnerabilities' -Value $false
+        }
+        if ($entry.'tunnel-other-application'.'#text')
+        {
+            $tunnelApplication = $entry.'tunnel-other-application'.'#text'.tolower()
+        }
+        else
+        {
+            $tunnelApplication = $entry.'tunnel-other-application'.tolower()
+        }
+        if ($tunnelApplication -match 'yes')
+        {
+            Add-Member -InputObject $application -MemberType NoteProperty -Name 'TunnelOtherApplication' -Value $true
+        }
+        else
+        {
+            Add-Member -InputObject $application -MemberType NoteProperty -Name 'TunnelOtherApplication' -Value $false
+        }
+        if ($entry.'tunnel-applications'.member)
+        {
+            $applicationList = New-Object System.Collections.ArrayList
+            foreach ($member in $entry.'tunnel-applications'.member)
+            {
+                if ($member.'#text')
+                {
+                    [void]$applicationList.add($member.'#text')
+                }
+                else
+                {
+                    [void]$applicationList.add($member)
+                }
+            }
+            Add-Member -InputObject $application -MemberType NoteProperty -Name 'TunneledApplications' -Value ($applicationList -join ';')
+        }
+        if ($entry.'prone-to-misuse'.tolower() -match 'yes')
+        {
+            Add-Member -InputObject $application -MemberType NoteProperty -Name 'ProneToMisuse' -Value $true
+        }
+        else
+        {
+            Add-Member -InputObject $application -MemberType NoteProperty -Name 'ProneToMisuse' -Value $false
+        }
+        if ($entry.'pervasive-use'.tolower() -match 'yes')
+        {
+            Add-Member -InputObject $application -MemberType NoteProperty -Name 'PervasiveUse' -Value $true
+        }
+        else
+        {
+            Add-Member -InputObject $application -MemberType NoteProperty -Name 'PervasiveUse' -Value $false
+        }
+        Add-Member -InputObject $application -MemberType NoteProperty -Name 'Risk ' -Value $entry.risk
+        $references = New-Object System.Collections.ArrayList
+        foreach ($reference in $entry.references.entry)
+        {
+            $object = new-object psobject
+            Add-Member -InputObject $object -MemberType NoteProperty -Name 'Name' -Value $reference.name
+            Add-Member -InputObject $object -MemberType NoteProperty -Name 'Link' -Value $reference.link
+            [void]$references.Add($object)
+        }
+        Add-Member -InputObject $application -MemberType NoteProperty -Name 'References' -Value $references
+        $ports = New-Object System.Collections.ArrayList
+        foreach ($member in $entry.default.port.member)
+        {
+            $protocol = $member.split('/')[0]
+            $portNums = $member.split('/')[1].split(',')
+            foreach ($portNum in $portNums)
+            {
+                $port = new-object psobject
+                Add-Member -InputObject $port -MemberType NoteProperty -Name 'Protocol' -Value $protocol
+                Add-Member -InputObject $port -MemberType NoteProperty -Name 'PortNum' -Value $portNum
+                [void]$ports.add($port)
+            }
+        }
+        Add-Member -InputObject $application -MemberType NoteProperty -Name 'DefaultPorts' -Value $ports
+        [void]$returnList.add($application)
+    }
+	return $returnList
+}
+
+<#
+.SYNOPSIS
 Returns a list of configured PA services from the candidate configuration.
 .Parameter ID
 Required.
