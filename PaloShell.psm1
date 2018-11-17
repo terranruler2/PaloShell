@@ -289,7 +289,7 @@ Function Add-PaloAltoManagementSession
 		{
 			Add-Member -InputObject $session -MemberType NoteProperty -Name 'VirtualSystem' -Value ('vsys' + [string]$VirtualSystemNumber)
 		}
-		#Add what information we do have the $managementSessions array. We actually don't have to remove it from the array later, powershell links the variable to its entry in the array so future updates to the object apply anyway.
+		#Add what information we do have to the $managementSessions array. We actually don't have to remove it from the array later, powershell links the variable to its entry in the array so future updates to the object apply anyway.
 		[void]$managementSessions.Add($session)
 		#Check to see if an old ID variable exists. If so remove it. This resolves an issue that is not properly caught when this function unexpectedly terminates and the ID variable is left in memory. This seems like a hack but it should resolve the issue with little work.
 		if ($ID)
@@ -327,28 +327,13 @@ Function Add-PaloAltoManagementSession
 		elseif ($Username -or $Password)
 		{
 			#Error because you cannot just have a username and no password.
-			throw 'You must specify both a Username and Password.'
+			throw 'If you specify a username you must specify a password. If you specify neither you will be prompted for your credentials.'
 		}
 		else
 		{
-			#Set the API Key. The API Key must be a variable as for some reason it cannot be save in the data table. (Since we are no longer using Datatables maybe there is a better way to handle this.) Turns out you can store a PScredential object as a member of another object and get the data from it. Doing that now.
+			#Set the API Key. The API Key must be a variable as for some reason it cannot be saved in the data table. (Since we are no longer using Datatables maybe there is a better way to handle this.) Turns out you can store a PScredential object as a member of another object and get the data from it. Doing that now.
 			#Get the API key and username from the function.
-			try
-			{
-				$result = getpaapikey
-			}
-			Catch
-			{
-				$CaughtException = $_
-				if ((findPaWebCallErrorCode($CaughtException.Exception)) -eq 403) #Check if the error was a 403. Throw an apropriate error.
-				{
-					throw "The username or password entered is incorrect."
-				}
-				else
-				{
-					throw $CaughtException
-				}
-			}
+			$result = getpaapikey			
 		}
 		#Store username and password together in a PScredential, because why not? Turns out formatting reasons is why not. For a better UX I'm leaving username as its own field so a user can figure out who is loggedin on a firewall session.
 		Add-Member -InputObject $session -MemberType NoteProperty -Name Credential -Value (New-Object System.Management.Automation.PSCredential ($result[1], $result[0])) 
@@ -565,10 +550,16 @@ Function getPaApiKey {
 	}
 	Catch
 	{
-		#If we get a 403 here it means the username and password combination is incorrect.
-		throw $_
-		#throw ('The web request failed with the following error: ' + $_.Exception.Message)
-    }
+		$CaughtException = $_
+		if ((findPaWebCallErrorCode($CaughtException.Exception)) -eq 403) #Check if the error was a 403. Throw an apropriate error.
+		{
+			throw "The username and/or password specified is incorrect."
+		}
+		else
+		{
+			throw $CaughtException
+		}
+	}
 	#Check that the request completed successfully.
 	ReturnPaAPIErrorIfError($xml) #This function checks for an error from the firewall and throws it if there is one.
 	#Get the API key as a secure string. This is then stored in memory as a secure string and not on the filesystem.
@@ -1413,7 +1404,7 @@ Function Get-PaPredefinedApplications {
 	param (
     [Parameter(Mandatory=$true,valueFromPipeline=$true)][String]$ID
     )
-	#This function has only been tested on PANOS8.1 6-6-18
+	#This function has only been tested on PANOS8.1 6-18-18
 	if(!$PaloAltoManagementSessionTable.findSessionByID($ID))
 	{
 		throw ('This session ID does not exist, you must create a session for this firewall or use an existing session. Check existing sessions using "Get-PaloAltoSession".')
@@ -5246,7 +5237,7 @@ Function isIpV4Address {
 
 <#
 .SYNOPSIS
-Return true if string passed is a valid IPv4.
+Return true if string passed is a valid IPv6.
 .PARAMETER 
 
 .PARAMETER 
@@ -5260,21 +5251,19 @@ Function isIpV6Address {
 	param (
     [Parameter(Mandatory=$true,valueFromPipeline=$true)][String]$address
 	)
-	try{
-		[void][ipaddress]$address
-		if ($address -match '\.') #Do this check because any valid number less than 4 billion or so is a valid ip address.... (Must escape the period)
-		{
-			return $true
-		}
-		else
-		{
-			return $false
-		}
-	}
-	Catch
-	{
-		return $false
-	}
+	#Determine if this is an IPv6 address.
+    if ($address -match ':')
+    {
+        try
+        {
+            [void][ipaddress]([string]$address) #To the best of my knowledge this is a valid way to check ipv6 addresses. I haven't verified.
+            return $true
+        }
+        Catch
+        {
+        return $false
+        }
+    }
 }
 
 
