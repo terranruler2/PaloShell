@@ -2876,35 +2876,35 @@ Function UpdatePaSecurityRule {
 	#The following if's check to see which fields in the rule need updating.
 	if ($SourceZone)
 	{
-		($rule.entry.from).InnerXml = TurnCSVListIntoXMLString -xmlNodes "member" -list $SourceZone
+		($rule.entry.from).InnerXml = ConvertCSVListIntoXMLString -xmlNodes "member" -list $SourceZone
 	}
 	if ($DestinationZone)
 	{
-		($rule.entry.to).InnerXml = TurnCSVListIntoXMLString -xmlNodes "member" -list $DestinationZone
+		($rule.entry.to).InnerXml = ConvertCSVListIntoXMLString -xmlNodes "member" -list $DestinationZone
 	}
 	if ($SourceAddress)
 	{
-		($rule.entry.source).InnerXml = TurnCSVListIntoXMLString -xmlNodes "member" -list $SourceAddress
+		($rule.entry.source).InnerXml = ConvertCSVListIntoXMLString -xmlNodes "member" -list $SourceAddress
 	}
 	if ($DestinationAddress)
 	{
-		($rule.entry.destination).InnerXml = TurnCSVListIntoXMLString -xmlNodes "member" -list $DestinationAddress
+		($rule.entry.destination).InnerXml = ConvertCSVListIntoXMLString -xmlNodes "member" -list $DestinationAddress
 	}
 	if ($User)
 	{
-		($rule.entry.'source-user').InnerXml = TurnCSVListIntoXMLString -xmlNodes "member" -list $User
+		($rule.entry.'source-user').InnerXml = ConvertCSVListIntoXMLString -xmlNodes "member" -list $User
 	}
 	if ($UrlCategory)
 	{
-		($rule.entry.category).InnerXml = TurnCSVListIntoXMLString -xmlNodes "member" -list $UrlCategory
+		($rule.entry.category).InnerXml = ConvertCSVListIntoXMLString -xmlNodes "member" -list $UrlCategory
 	}
 	if ($Application)
 	{
-		($rule.entry.application).InnerXml = TurnCSVListIntoXMLString -xmlNodes "member" -list $Application
+		($rule.entry.application).InnerXml = ConvertCSVListIntoXMLString -xmlNodes "member" -list $Application
 	}
 	if ($Service)
 	{
-		($rule.entry.service).InnerXml = TurnCSVListIntoXMLString -xmlNodes "member" -list $Service
+		($rule.entry.service).InnerXml = ConvertCSVListIntoXMLString -xmlNodes "member" -list $Service
 	}
 	if ($Action)
 	{
@@ -2919,7 +2919,8 @@ Function UpdatePaSecurityRule {
 			$node = $rule.entry.SelectSingleNode('//description')
 			#Remove the child node.
 			($rule.entry).RemoveChild($node)
-		}else
+		}
+		else
 		{
 			#Set the rule description.
 			$rule.entry.description = $Description
@@ -2936,14 +2937,15 @@ Function UpdatePaSecurityRule {
 			($rule.entry).RemoveChild($node)
 		}
 			#Set the IPS group.
-			($rule.entry).InnerXML += TurnCSVListIntoXMLString -xmlNodes 'profile-setting,group,member' -list $IPSGroup
+			($rule.entry).InnerXML += ConvertCSVListIntoXMLString -xmlNodes 'profile-setting,group,member' -list $IPSGroup
 	}
 	if ($IPSProfiles)
 	{
 		if (!$URLFilteringIPSProfile -and !$FileBlockingIPSProfile -and !$VirusIPSProfile -and !$SpywareIPSProfile -and !$VulnerabilityIPSProfile -and !$WildfireIPSProfile -and !$DataFilteringIPSProfile)
 		{
 			Write-Host "The script was requested to configure IPS profiles but there were no profiles specified."
-		}else
+		}
+		else
 		{
 			#Check if an IPS setting already exists. If it does, delete it.
 			if ($rule.entry.'profile-setting')
@@ -2956,31 +2958,31 @@ Function UpdatePaSecurityRule {
 			$xmlString = '<profile-setting><profiles>'
 			if ($URLFilteringIPSProfile)
 			{
-				$xmlString += TurnCSVListIntoXMLString -xmlNodes "url-filtering,member" -list $URLFilteringIPSProfile
+				$xmlString += ConvertCSVListIntoXMLString -xmlNodes "url-filtering,member" -list $URLFilteringIPSProfile
 			}
 			if ($FileBlockingIPSProfile)
 			{
-				$xmlString += TurnCSVListIntoXMLString -xmlNodes "file-blocking,member" -list $FileBlockingIPSProfile
+				$xmlString += ConvertCSVListIntoXMLString -xmlNodes "file-blocking,member" -list $FileBlockingIPSProfile
 			}
 			if ($VirusIPSProfile)
 			{
-				$xmlString += TurnCSVListIntoXMLString -xmlNodes "virus,member" -list $VirusIPSProfile
+				$xmlString += ConvertCSVListIntoXMLString -xmlNodes "virus,member" -list $VirusIPSProfile
 			}
 			if ($SpywareIPSProfile)
 			{
-				$xmlString += TurnCSVListIntoXMLString -xmlNodes "spyware,member" -list $SpywareIPSProfile
+				$xmlString += ConvertCSVListIntoXMLString -xmlNodes "spyware,member" -list $SpywareIPSProfile
 			}
 			if ($VulnerabilityIPSProfile)
 			{
-				$xmlString += TurnCSVListIntoXMLString -xmlNodes "vulnerability,member" -list $VulnerabilityIPSProfile
+				$xmlString += ConvertCSVListIntoXMLString -xmlNodes "vulnerability,member" -list $VulnerabilityIPSProfile
 			}
 			if ($WildfireIPSProfile)
 			{
-				$xmlString += TurnCSVListIntoXMLString -xmlNodes "wildfire-analysis,member" -list $WildfireIPSProfile
+				$xmlString += ConvertCSVListIntoXMLString -xmlNodes "wildfire-analysis,member" -list $WildfireIPSProfile
 			}
 			if ($DataFilteringIPSProfile)
 			{
-				$xmlString += TurnCSVListIntoXMLString -xmlNodes "data-filtering,member" -list $DataFilteringIPSProfile
+				$xmlString += ConvertCSVListIntoXMLString -xmlNodes "data-filtering,member" -list $DataFilteringIPSProfile
 			}
 			$xmlString += '</profiles></profile-setting>'
 			($rule.entry).InnerXML += $xmlString
@@ -3170,97 +3172,97 @@ Function Add-PaSecurityRule {
 	#Set negate source if specified.
 	if ($NegateSourceAddress)
 	{
-		$xmlString += TurnCSVListIntoXMLString -xmlNodes "negate-source" -list 'yes'
+		$xmlString += ConvertCSVListIntoXMLString -xmlNodes "negate-source" -list 'yes'
 	}
 	#Set negate destination if specified.
 	if ($NegateDestinationAddress)
 	{
-		$xmlString += TurnCSVListIntoXMLString -xmlNodes "negate-destination" -list 'yes'
+		$xmlString += ConvertCSVListIntoXMLString -xmlNodes "negate-destination" -list 'yes'
 	}
 	#Build the source zone config.
 	$xmlString += '<from>'
-	$xmlString += TurnCSVListIntoXMLString -xmlNodes "member" -list $SourceZone
+	$xmlString += ConvertCSVListIntoXMLString -xmlNodes "member" -list $SourceZone
 	$xmlString += '</from>'
 	#Build the Destination zone config.
 	$xmlString += '<to>'
-	$xmlString += TurnCSVListIntoXMLString -xmlNodes "member" -list $DestinationZone
+	$xmlString += ConvertCSVListIntoXMLString -xmlNodes "member" -list $DestinationZone
 	$xmlString += '</to>'
 	#Build the Source address config.
 	$xmlString += '<source>'
-	$xmlString += TurnCSVListIntoXMLString -xmlNodes "member" -list $SourceAddress
+	$xmlString += ConvertCSVListIntoXMLString -xmlNodes "member" -list $SourceAddress
 	$xmlString += '</source>'
 	#Build the Destination address config.
 	$xmlString += '<destination>'
-	$xmlString += TurnCSVListIntoXMLString -xmlNodes "member" -list $DestinationAddress
+	$xmlString += ConvertCSVListIntoXMLString -xmlNodes "member" -list $DestinationAddress
 	$xmlString += '</destination>'
 	#Build the user config. If none is specified leave it out.
 	if ($User)
 	{
 		$xmlString += '<source-user>'
-		$xmlString += TurnCSVListIntoXMLString -xmlNodes "member" -list $User
+		$xmlString += ConvertCSVListIntoXMLString -xmlNodes "member" -list $User
 		$xmlString += '</source-user>'
 	}
 	#Build the URL category config.
 	$xmlString += '<category>'
 	if ($UrlCategory)
 	{
-		$xmlString += TurnCSVListIntoXMLString -xmlNodes "member" -list $UrlCategory
+		$xmlString += ConvertCSVListIntoXMLString -xmlNodes "member" -list $UrlCategory
 	}else
 	{
-		$xmlString += TurnCSVListIntoXMLString -xmlNodes "member" -list 'any'
+		$xmlString += ConvertCSVListIntoXMLString -xmlNodes "member" -list 'any'
 	}
 	$xmlString += '</category>'
 	#Build the Application config.
 	$xmlString += '<application>'
-	$xmlString += TurnCSVListIntoXMLString -xmlNodes "member" -list $Application
+	$xmlString += ConvertCSVListIntoXMLString -xmlNodes "member" -list $Application
 	$xmlString += '</application>'
 	#Build the Service (ports) config.
 	$xmlString += '<service>'
-	$xmlString += TurnCSVListIntoXMLString -xmlNodes "member" -list $Service
+	$xmlString += ConvertCSVListIntoXMLString -xmlNodes "member" -list $Service
 	$xmlString += '</service>'
 	#Build the rule Action.
-	$xmlString += TurnCSVListIntoXMLString -xmlNodes "action" -list $Action
+	$xmlString += ConvertCSVListIntoXMLString -xmlNodes "action" -list $Action
 	#Build the rule description, leave empty if not specified.
 	if ($Description)
 	{
 		#Set the rule description.
-		$xmlString += TurnCSVListIntoXMLString -xmlNodes "description" -list $Description
+		$xmlString += ConvertCSVListIntoXMLString -xmlNodes "description" -list $Description
 	}
 	#Build the IPS configuration. If non is specified then don't create any XML.
 	if ($IPSGroup)
 	{
-			$xmlString += TurnCSVListIntoXMLString -xmlNodes "profile-settinggroupmember" -list $IPSGroup
+			$xmlString += ConvertCSVListIntoXMLString -xmlNodes "profile-settinggroupmember" -list $IPSGroup
 	}
 	if ($IPSProfiles)
 	{
 		$xmlString += '<profile-setting><profiles>'
 		if ($URLFilteringIPSProfile)
 		{
-			$xmlString += TurnCSVListIntoXMLString -xmlNodes "url-filtering,member" -list $URLFilteringIPSProfile
+			$xmlString += ConvertCSVListIntoXMLString -xmlNodes "url-filtering,member" -list $URLFilteringIPSProfile
 		}
 		if ($FileBlockingIPSProfile)
 		{
-			$xmlString += TurnCSVListIntoXMLString -xmlNodes "file-blocking,member" -list $FileBlockingIPSProfile
+			$xmlString += ConvertCSVListIntoXMLString -xmlNodes "file-blocking,member" -list $FileBlockingIPSProfile
 		}
 		if ($VirusIPSProfile)
 		{
-			$xmlString += TurnCSVListIntoXMLString -xmlNodes "virus,member" -list $VirusIPSProfile
+			$xmlString += ConvertCSVListIntoXMLString -xmlNodes "virus,member" -list $VirusIPSProfile
 		}
 		if ($SpywareIPSProfile)
 		{
-			$xmlString += TurnCSVListIntoXMLString -xmlNodes "spyware,member" -list $SpywareIPSProfile
+			$xmlString += ConvertCSVListIntoXMLString -xmlNodes "spyware,member" -list $SpywareIPSProfile
 		}
 		if ($VulnerabilityIPSProfile)
 		{
-			$xmlString += TurnCSVListIntoXMLString -xmlNodes "vulnerability,member" -list $VulnerabilityIPSProfile
+			$xmlString += ConvertCSVListIntoXMLString -xmlNodes "vulnerability,member" -list $VulnerabilityIPSProfile
 		}
 		if ($WildfireIPSProfile)
 		{
-			$xmlString += TurnCSVListIntoXMLString -xmlNodes "wildfire-analysis,member" -list $WildfireIPSProfile
+			$xmlString += ConvertCSVListIntoXMLString -xmlNodes "wildfire-analysis,member" -list $WildfireIPSProfile
 		}
 		if ($DataFilteringIPSProfile)
 		{
-			$xmlString += TurnCSVListIntoXMLString -xmlNodes "data-filtering,member" -list $DataFilteringIPSProfile
+			$xmlString += ConvertCSVListIntoXMLString -xmlNodes "data-filtering,member" -list $DataFilteringIPSProfile
 		}
 		$xmlString += '</profiles></profile-setting>'
 	}
@@ -3400,7 +3402,7 @@ Function Remove-PaSecurityRule {
 }#>
 <#
 .SYNOPSIS
-Reboot the specified firewall.
+Immediately reboot the specified firewall.
 .Parameter ID
 Required.
 This is the session ID of the firewall you wish to run this command on. You can find the ID to firewall mapping by running the "Get-PaloAltoManagementSession" command.
