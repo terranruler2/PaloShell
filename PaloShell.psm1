@@ -391,7 +391,7 @@ Function Add-PaloAltoManagementSession
 
 		Write-Debug 'Successfully added the management session to the management session table.'
 		$returnObject = New-Object PSObject
-		Add-Member -InputObject $returnObject -MemberType NoteProperty -Name Status -Value 'Success'
+		#Add-Member -InputObject $returnObject -MemberType NoteProperty -Name Status -Value 'Success'
 		Add-Member -InputObject $returnObject -MemberType NoteProperty -Name MgmtSessionID -Value $session.SessionID
 		Write-Debug ('The session ID is ' + $session.SessionID)
 		#Remove all Variables before returning.
