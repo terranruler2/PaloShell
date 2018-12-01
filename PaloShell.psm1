@@ -959,7 +959,6 @@ This is the session ID of the firewall you wish to run this command on. You can 
 .PARAMETER 
 	
 
-
 #>
 Function Show-PaIpsecSa {
 	param (
@@ -987,7 +986,6 @@ This is the session ID of the firewall you wish to run this command on. You can 
 .PARAMETER 
 	
 .PARAMETER 
-	
 
 
 #>
@@ -2752,7 +2750,7 @@ Function Show-PaHAStatus
 	{
 		Add-Member -InputObject $returnObject -MemberType NoteProperty -Name HAPeerPreempt -Value $true
 	}
-	Add-Member -InputObject $returnObject -MemberType NoteProperty -Name HALocalStateSync -Value $haStatusResponse.response.result.group.'local-info'.'state-sync' #This variable tells us if all of the syncing is occring correctly. If it is the value will be 'Complete'
+	Add-Member -InputObject $returnObject -MemberType NoteProperty -Name HALocalStateSync -Value $haStatusResponse.response.result.group.'local-info'.'state-sync' #This variable tells us if all of the syncing is occuring correctly. If it is the value will be 'Complete'
 	return $returnObject
 }
 
@@ -2776,10 +2774,11 @@ Function Show-PaGeoIpLocation {
 	{
 		throw ('This session ID does not exist, you must create a session for this firewall or use an existing session. Check existing sessions using "Get-PaloAltoSession".')
 	}
-	$returnObject = New-Object psobject
+	
 	$paResponse = [xml]($PaloAltoModuleWebClient.downloadstring("https://" + $PaloAltoManagementSessionTable.findSessionByID($ID).Hostname + "/api/?type=op&cmd=<show><location><ip>" + $IP + "</ip></location></show>&key=" + (GetPaAPIKeyClearText)))
 	ReturnPaAPIErrorIfError($paResponse) #This function checks for an error from the firewall and throws it if there is one.
-
+	
+	$returnObject = New-Object psobject
 	Add-Member -InputObject $returnObject -MemberType NoteProperty -Name 'CountryCode' -Value $paResponse.response.result.entry.cc
 	Add-Member -InputObject $returnObject -MemberType NoteProperty -Name 'IP' -Value $paResponse.response.result.entry.ip
 	Add-Member -InputObject $returnObject -MemberType NoteProperty -Name 'CountryName' -Value $paResponse.response.result.entry.country

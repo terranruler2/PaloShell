@@ -10,16 +10,16 @@ This module I’m sure is rough around the edges and there is probably a lot of 
 How to use this module
 ====
 
-All you need to do to use this module is download the single PaloShell.psm1 file. All of the code you need is in there. Once you have downloaded this file open PowerShell and run the command “Import-Module <path to module>”. There are some unapproved verbs in there and PowerShell will tell you that, it is safe to ignore these warnings.
+All you need to do to use this module is download the single PaloShell.psm1 file. (Please ensure you are downloading it from the "master" Branch.) All of the code you need is in there. Once you have downloaded this file open PowerShell and run the command “Import-Module <path to module>”. There are some unapproved verbs in there and PowerShell will tell you that, it is safe to ignore these warnings.
 
 At this time I haven’t fully flushed out the help output but to get the help for the commands you can run “get-help \<commandName\> -detail”. That will print out the help for the command if it exists. I am working to update the help as I can.
 
-The next command to run is “Add-PaloAltoManagementSession”. This command created the Palo Alto firewall object the module will reference for future commands. You can run get-help on this command but I’ll include an example here as well. The command is run like this:
+The next command to run is “Add-PaloAltoManagementSession”. This command creates the Palo Alto firewall object the module will reference for future commands. You can run get-help on this command but I’ll include an example here as well. The command is run like this:
 “Add-PaloAltoManagementSession -hostname \<hostname or IP address of firewall\>”. That’s all you need. You will then be prompted to enter your username and password. (If you don’t have a valid SSL certificate on your firewall then shame on you but I’ve accounted for this. You can add the “-DisableSSLCertificateCheck” switch to the command and it will ignore the SSL certificate validity of the firewall. This is insecure!) If there is no error the output of this command is a PowerShell object. PowerShell should display something like this:
 
-Status			MgmtSessionID
-
-Success             3 
+MgmtSessionID
+-------------
+            1
 
 
 The “MgmtSessionID” is the number you need to pass any other command you use in this module. Every command will have a mandatory -ID switch. You must use the “MgmtSessionID” of the firewall you want to make changes to. You can add as many management sessions as you want and if you forget which ID goes with which firewall you can use the “Get-PaloAltoManagementSession” command to give you the list of firewalls you have added.

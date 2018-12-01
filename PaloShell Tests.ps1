@@ -13,6 +13,16 @@ $testIpRangeAddressObjectValue = '192.168.1.0-192.168.1.5'
 $testIpNetmaskAddressObjectValue = '10.5.6.0/20'
 $testAddressGroupName = 'testing123'
 $testAddressGroupValue = ($testFQDNAddressObjectName + ',' + $testIpRangeAddressObjectName + ',' + $testIpNetmaskAddressObjectName)
+$testTCPServiceObjectName = 'test123'
+$testTCPServiceObjectValue = '78'
+$testUDPServiceObjectName = 'test456'
+$testUDPServiceObjectValue = '78'
+$testServiceGroupName = 'test456'
+$testServiceGroupValue = ($testTCPServiceObjectName + ',' + $testUDPServiceObjectName)
+$testNatRuleName1 = 'test123'
+$testNatRuleName2 = 'test456'
+$testSecurityRuleName1 = 'test123'
+$testSecurityRuleName2 = 'test456'
 
 if ($firewallHostname -eq '<insert Firewall IP address or hostname here>')
 {
@@ -29,29 +39,31 @@ Import-Module $paloshellModulePath
 $result = Add-PaloAltoManagementSession -Hostname $firewallHostname -DisableSSLCertificateCheck -PSCredential $cred
 $sessionID = $result.MgmtSessionID
 
-Show-PaRoutingTable -ID $sessionID
+Show-PaRoutingTable -ID $sessionID #This should either complete successfully or throw an error on it's own.
 
-Show-PaActiveSessions -ID $sessionID 
+Show-PaActiveSessions -ID $sessionID  #This should either complete successfully or throw an error on it's own.
 
-Show-PaArpEntries -ID $sessionID 
+Show-PaArpEntries -ID $sessionID  #This should either complete successfully or throw an error on it's own.
 
-Show-PaHAStatus -ID $sessionID 
+Show-PaHAStatus -ID $sessionID  #This should either complete successfully or throw an error on it's own.
 
-Show-PaInfo -ID $sessionID 
+Show-PaInfo -ID $sessionID  #This should either complete successfully or throw an error on it's own.
 
-$test = Show-PaInterface -ID $sessionID
-$test.InterfaceNetworkStats
-$test.InterfacePhysicalStats
+Show-PaInterface -ID $sessionID #This should either complete successfully or throw an error on it's own.
 
-Show-PaIpsecSa -ID $sessionID 
+Show-PaIpsecSa -ID $sessionID  #This should either complete successfully or throw an error on it's own.
 
-Show-PaJobs -ID $sessionID -All
+$jobs = Show-PaJobs -ID $sessionID -All #This should either complete successfully or throw an error on it's own.
+#Next check that we can pull back data on just one job.
+Show-PaJobs -ID $sessionID -jobID $jobs[0].id
 
-Show-PaRuleHitCount -ID $sessionID -AllRuleTypes
+Show-PaJobs -ID $sessionID -Processed #This should either complete successfully or throw an error on it's own.
+Show-PaJobs -ID $sessionID -Pending #This should either complete successfully or throw an error on it's own.
 
+Show-PaRuleHitCount -ID $sessionID -AllRuleTypes #This should either complete successfully or throw an error on it's own. Due to the way this functions is written it is throoughly tested with this flag given to it.
 
-$test = Show-PaRunningConfig -ID $sessionID 
-$test.config
+Show-PaRunningConfig -ID $sessionID #This should either complete successfully or throw an error on it's own.
+
 
 Add-PaUserIDMapping -ID $sessionID -Username $userIDTestUsername -IpAddress $userIDTestIp1 -Timeout 5
 Add-PaUserIDMapping -ID $sessionID -Username $userIDTestUsername -IpAddress $userIDTestIp2 -Timeout 5
@@ -99,6 +111,29 @@ Add-PaAddressObject -ID $sessionID -AddressName $testIpNetmaskAddressObjectName 
 
 Add-PaAddressGroup -ID $sessionID -AddressGroupName $testAddressGroupName -Members $testAddressGroupValue
 
+Add-PaServiceObject -ID $sessionID -ServiceName $testTCPServiceObjectName -TCP -port $testTCPServiceObjectValue
+Add-PaServiceObject -ID $sessionID -ServiceName $testUDPServiceObjectName -UDP -port $testUDPServiceObjectValue
+
+Add-PaServiceGroup -ID $sessionID -ServiceGroupName $testServiceGroupName -Members $testServiceGroupValue 
+
+Add-PaNATRule -ID $sessionID -RuleName $testNatRuleName1 -Service $testTCPServiceObjectName -SourceAddress 0.0.0.0/0 -DestinationAddress '1.1.1.1' -SourceZone Trust -DestinationZone Trust -Description woot -NATDestinationPort 60 -NATDestinationAddress 2.2.2.2
+Add-PaNATRule -ID $sessionID -RuleName $testNatRuleName2 -Service $testUDPServiceObjectName -SourceAddress 0.0.0.0/0 -DestinationAddress '1.1.1.1' -SourceZone Trust -DestinationZone Trust -Description woot -NATDestinationPort 60 -NATDestinationAddress 2.2.2.2
+
+Add-PaSecurityRule -ID $sessionID -RuleName $testSecurityRuleName1 -Service $testTCPServiceObjectName -SourceAddress 0.0.0.0/0 -DestinationAddress '1.1.1.1' -SourceZone Trust -DestinationZone Trust -Description woot -Application web-browsing -NegateDestinationAddress -Action allow -NoIPS 
+Add-PaSecurityRule -ID $sessionID -RuleName $testSecurityRuleName2 -Service $testUDPServiceObjectName -SourceAddress 0.0.0.0/0 -DestinationAddress '1.1.1.1' -SourceZone Trust -DestinationZone Trust -Description woot -Application web-browsing -NegateDestinationAddress -Action allow -NoIPS 
+
+Move-PaNATRule -ID $sessionID -RuleToMove $testNatRuleName1 -MoveToTop
+Move-PaNATRule -ID $sessionID -RuleToMove $testNatRuleName2 -MoveAfterRule $testNatRuleName1
+
+Move-PaSecurityRule -ID $sessionID -RuleToMove $testSecurityRuleName1 -MoveToTop
+Move-PaSecurityRule -ID $sessionID -RuleToMove $testSecurityRuleName2 -MoveAfterRule $testSecurityRuleName1
+
+Remove-PaNATRule -ID $sessionID -RuleName $testNatRuleName1
+Remove-PaNATRule -ID $sessionID -RuleName $testNatRuleName2
+
+Remove-PaSecurityRule -ID $sessionID -RuleName $testSecurityRuleName1
+Remove-PaSecurityRule -ID $sessionID -RuleName $testSecurityRuleName2
+
 Remove-PaAddressGroup -ID $sessionID -AddressGroupName $testAddressGroupName
 
 Remove-PaAddressObject -ID $sessionID -AddressName $testFQDNAddressObjectName 
@@ -106,27 +141,11 @@ Remove-PaAddressObject -ID $sessionID -AddressName $testIpRangeAddressObjectName
 Remove-PaAddressObject -ID $sessionID -AddressName $testIpNetmaskAddressObjectName 
 
 
-Add-PaServiceObject -ID $sessionID -ServiceName test123 -TCP -port 78
 
-Add-PaNATRule -ID $sessionID -RuleName test123 -Service test123 -SourceAddress 0.0.0.0/0 -DestinationAddress '1.1.1.1' -SourceZone Trust -DestinationZone Trust -Description woot -NATDestinationPort 60 -NATDestinationAddress 2.2.2.2
+Remove-PaServiceGroup -ID $sessionID -ServiceGroupName $testServiceGroupName
 
-Add-PaSecurityRule -ID $sessionID -RuleName test123 -Service test123 -SourceAddress 0.0.0.0/0 -DestinationAddress '1.1.1.1' -SourceZone Trust -DestinationZone Trust -Description woot -Application web-browsing -NegateDestinationAddress -Action allow -NoIPS 
-
-Move-PaNATRule -ID $sessionID -RuleToMove test123 -MoveToTop
-
-Move-PaSecurityRule -ID $sessionID -RuleToMove test123 -MoveToTop
-
-
-Remove-PaNATRule -ID $sessionID -RuleName test123
-
-Remove-PaSecurityRule -ID $sessionID -RuleName test123
-
-
-Add-PaServiceGroup -ID $sessionID -ServiceGroupName test456 -Members test123
-
-Remove-PaServiceGroup -ID $sessionID -ServiceGroupName test456
-
-Remove-PaServiceObject -ID $sessionID -ServiceName test123
+Remove-PaServiceObject -ID $sessionID -ServiceName $testTCPServiceObjectName
+Remove-PaServiceObject -ID $sessionID -ServiceName $testUDPServiceObjectName
 
 #Reboot-PaloAlto -ID $sessionID 
 #Reboot-PaloAlto -ID 2 
