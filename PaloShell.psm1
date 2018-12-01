@@ -4510,12 +4510,14 @@ Function Add-PaAddressGroup
 	$xmlString = ('<entry name="' + $AddressGroupName + '">')
 	#For now all address groups are static.
 	$xmlString += '<static>'
-	foreach ($entry in $Members.Split(','))
+	$xmlString += ConvertCSVListIntoXMLString -xmlNodes 'member' -list $Members
+	<#foreach ($entry in $Members.Split(','))
 	{
 		$xmlString += "<member>"
 		$xmlString += $entry
 		$xmlString += "</member>"
 	}
+	#>
 	$xmlString += '</static>'
 	if ($Description)
 	{
