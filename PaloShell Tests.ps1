@@ -65,32 +65,37 @@ Show-PaRuleHitCount -ID $sessionID -AllRuleTypes #This should either complete su
 Show-PaRunningConfig -ID $sessionID #This should either complete successfully or throw an error on it's own.
 
 
-Add-PaUserIDMapping -ID $sessionID -Username $userIDTestUsername -IpAddress $userIDTestIp1 -Timeout 5
-Add-PaUserIDMapping -ID $sessionID -Username $userIDTestUsername -IpAddress $userIDTestIp2 -Timeout 5
+Add-PaUserIDMapping -ID $sessionID -Username $userIDTestUsername1 -IpAddress $userIDTestIp1 -Timeout 5
+Add-PaUserIDMapping -ID $sessionID -Username $userIDTestUsername2 -IpAddress $userIDTestIp2 -Timeout 5
 
 sleep 5
 
-Show-PaUserIDMapping -ID $sessionID
+$users = Show-PaUserIDMapping -ID $sessionID #test this command but get the results to ensure that the Add-PaUserIDMapping function worked as expected.
+$userIDTestUser1Found = $false
+$userIDTestUser2Found = $false
+foreach ($user in $users)
+{
+	if ($user.User -eq $userIDTestUsername1 -and -$user.IPAddress -eq $userIDTestIp1)
+	{
+		$userIDTestUser1Found = $true
+		continue
+	}
+	if ($user.User -eq $userIDTestUsername2 -and -$user.IPAddress -eq $userIDTestIp2)
+	{
+		$userIDTestUser2Found = $true
+	}
+}
 
-Get-PaAddressGroups -ID $sessionID #needs an update for panos 8.1, doesn't pull uncommitted changes apropriately.###################################################
-
-Get-PaAddressObjects -ID $sessionID 
+if (!($userIDTestUser1Found -and $userIDTestUser2Found))
+{
+	throw 'At least one UserID mapping for the test users was not seen in the Show-PaUserIDMapping results.'
+}
 
 Get-PaAvailableSoftwareVersions -ID $sessionID 
 
 Request-PaAvailableSoftwareVersions -ID $sessionID 
-
+#resume check the script from this point (12-1-18)
 Get-PaloAltoManagementSession 
-
-Get-PaNATRules -ID $sessionID 
-
-Get-PaPolicyRoutingRules -ID $sessionID 
-
-Get-PaSecurityRules -ID $sessionID 
-
-Get-PaServiceGroups -ID $sessionID 
-
-Get-PaServices -ID $sessionID 
 
 Get-PaSessionInformation -ID $sessionID 
 
@@ -121,6 +126,20 @@ Add-PaNATRule -ID $sessionID -RuleName $testNatRuleName2 -Service $testUDPServic
 
 Add-PaSecurityRule -ID $sessionID -RuleName $testSecurityRuleName1 -Service $testTCPServiceObjectName -SourceAddress 0.0.0.0/0 -DestinationAddress '1.1.1.1' -SourceZone Trust -DestinationZone Trust -Description woot -Application web-browsing -NegateDestinationAddress -Action allow -NoIPS 
 Add-PaSecurityRule -ID $sessionID -RuleName $testSecurityRuleName2 -Service $testUDPServiceObjectName -SourceAddress 0.0.0.0/0 -DestinationAddress '1.1.1.1' -SourceZone Trust -DestinationZone Trust -Description woot -Application web-browsing -NegateDestinationAddress -Action allow -NoIPS 
+
+Get-PaAddressGroups -ID $sessionID #needs an update for panos 8.1, doesn't pull uncommitted changes apropriately.###################################################
+
+Get-PaAddressObjects -ID $sessionID 
+
+Get-PaNATRules -ID $sessionID 
+
+Get-PaPolicyRoutingRules -ID $sessionID 
+
+Get-PaSecurityRules -ID $sessionID 
+
+Get-PaServiceGroups -ID $sessionID 
+
+Get-PaServices -ID $sessionID 
 
 Move-PaNATRule -ID $sessionID -RuleToMove $testNatRuleName1 -MoveToTop
 Move-PaNATRule -ID $sessionID -RuleToMove $testNatRuleName2 -MoveAfterRule $testNatRuleName1
