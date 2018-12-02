@@ -61,7 +61,10 @@ Add-Member -InputObject $PaloAltoManagementSessionTable -MemberType ScriptMethod
 }
 #The following method is used to give a count of the current entries in the PaloAltoManagementSessionTable .
 Add-Member -InputObject $PaloAltoManagementSessionTable -MemberType ScriptMethod -Name count -Value {
-    $managmentSessions.Count
+    $managementSessions.Count
+}
+Add-Member -InputObject $PaloAltoManagementSessionTable -MemberType ScriptMethod -Name listSessions -Value {
+	$managementSessions | select SessionID,Hostname,DisableSSLCertCheck,DeviceName,VirtualSystem,Username,PANOSMajorVersion,PANOSMinorVersion
 }
 
 #The following powershell object works for abstracting web calls so they will work with Linux or Windows.
@@ -442,17 +445,11 @@ Lists all configured Palo Alto Management Sessions. This command is useful for l
 #>
 Function Get-PaloAltoManagementSession
 {
-	if($managementSessions -eq '0') #I'm not sure this if does anything....
+	if($PaloAltoManagementSessionTable.count -eq '0') #Check if there aren't any entries in the $PaloAltoManagementSessionTable
 	{
 		throw ('There are no defined sessions. Create them using "Add-PaloAltoSession"')
 	}
-	elseif(!$managementSessions)
-	{
-		#If the array list is empty then we ended up here. Throw an error that there are not defined management sessions.
-		throw ('There are no defined sessions. Create them using "Add-PaloAltoSession"')
-	}
-	#Nicely output the ManagementSessions.
-	$managementSessions | select SessionID,Hostname,DisableSSLCertCheck,DeviceName,VirtualSystem,Username,PANOSMajorVersion,PANOSMinorVersion | ft
+	return $PaloAltoManagementSessionTable.listSessions()
 }
 
 <#

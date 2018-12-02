@@ -84,6 +84,10 @@ foreach ($user in $users)
 	{
 		$userIDTestUser2Found = $true
 	}
+	if ($userIDTestUser1Found -and $userIDTestUser2Found)
+	{
+		break
+	}
 }
 
 if (!($userIDTestUser1Found -and $userIDTestUser2Found))
@@ -95,7 +99,21 @@ Get-PaAvailableSoftwareVersions -ID $sessionID
 
 Request-PaAvailableSoftwareVersions -ID $sessionID 
 #resume check the script from this point (12-1-18)
-Get-PaloAltoManagementSession 
+$managementSessions = Get-PaloAltoManagementSession 
+#Check that the management session populated correctly. It should have if we got to this point but double check.
+$managementSessionCheckPassed = $false
+foreach ($managementSession in $managementSessions)
+{
+	if ($managementSession.SessionID -eq $sessionID -and $managementSession.Hostname -eq $firewallHostname)
+	{
+		$managementSessionCheckPassed = $true
+	}
+}
+if (!$managementSessionCheckPassed)
+{
+	throw 'Did not find a management session that matched the specified management session.' #Need to update this message
+}
+
 
 Get-PaSessionInformation -ID $sessionID 
 
