@@ -2060,7 +2060,7 @@ Function Show-PaArpEntries {
 
 <#
 .SYNOPSIS
-This function is used to check Palo Alto traffic, threat, and URL logs for blocked traffic. It can also return some logs so the user can get a better idea of why the traffic was blocked it desired.
+This function is used to check Palo Alto traffic, threat, and URL logs for blocked traffic. It can also return some logs so the user can get a better idea of why the traffic was blocked it desired. By default this command only looks for logs within the previous 24 hours.
 .Parameter ID
 Required.
 This is the session ID of the firewall you wish to run this command on. You can find the ID to firewall mapping by running the "Get-PaloAltoManagementSession" command.
@@ -2091,7 +2091,7 @@ Function Check-PaLogsForBlockedTraffic
 {
 	param (
     [Parameter(Mandatory=$true,valueFromPipeline=$true)][String]$ID,
-	[Parameter(Mandatory=$false,valueFromPipeline=$true)][String]$SearchAfterDate = (get-date (Get-Date).AddDays('-1') -Format 'yyyy/MM/dd HH:mm:ss'), #Only search the past day unless sotherwise specified.
+	[Parameter(Mandatory=$false,valueFromPipeline=$true)][String]$SearchAfterDate = (Get-Date (Get-Date).AddDays('-1') -Format 'yyyy/MM/dd HH:mm:ss'), #Only search the past day unless otherwise specified.
 	[Parameter(Mandatory=$false,valueFromPipeline=$true)]$SourceAddress, #Can be multiple DNS names and/or IP addresses
 	[Parameter(Mandatory=$false,valueFromPipeline=$true)]$DestinationAddress, #Can be multiple DNS names and/or IP addresses
 	[Parameter(Mandatory=$false,valueFromPipeline=$true)][String]$NumberOfLogsToReturn = 1, #Defines how many logs to return. Max 5000
@@ -2120,11 +2120,8 @@ Function Check-PaLogsForBlockedTraffic
 	if ($SourceAddress)
 	{
 		$SourceAddresses = New-Object System.Collections.ArrayList
-		foreach($entry in $SourceAddress)
+		foreach($entry in $SourceAddress.split(','))
 		{
-			$addressObject = New-Object psobject
-			Add-Member -InputObject $addressObject  -MemberType NoteProperty -Name 'address' -Value $address
-			Add-Member -InputObject $addressObject  -MemberType NoteProperty -Name 'port' -Value $port 
 			try
 			{
 				$result = ParseURL -userInput $entry
@@ -2142,11 +2139,8 @@ Function Check-PaLogsForBlockedTraffic
 	if ($DestinationAddress)
 	{
 		$DestinationAddresses = New-Object System.Collections.ArrayList
-		foreach($entry in $DestinationAddress)
+		foreach($entry in $DestinationAddress.split(','))
 		{
-			$addressObject = New-Object psobject
-			Add-Member -InputObject $addressObject  -MemberType NoteProperty -Name 'address' -Value $address
-			Add-Member -InputObject $addressObject  -MemberType NoteProperty -Name 'port' -Value $port 
 			try
 			{
 				$result = ParseURL -userInput $entry
@@ -2174,7 +2168,7 @@ Function Check-PaLogsForBlockedTraffic
 			}
 			else
 			{
-							$query += "(addr.src eq '" + $SourceAddress.IpAddress  + "') or "
+				$query += "(addr.src eq '" + $SourceAddress.IpAddress  + "') or "
 			}
 		}
 		$query = $query.Substring(0,($query.Length -4)) #Once the loop is complete remove the trailing ' or '
@@ -2267,11 +2261,28 @@ This is a generic function used to request a job to get PA logs.
 .Parameter ID
 Required.
 This is the session ID of the firewall you wish to run this command on. You can find the ID to firewall mapping by running the "Get-PaloAltoManagementSession" command.
-
+.Parameter traffic
+Optional.
+Use this switch to specify that you want to retrieve traffic logs from the firewall.
+.Parameter threat
+Optional.
+Use this switch to specify that you want to retrieve threat logs from the firewall.
+.Parameter url
+Optional.
+Use this switch to specify that you want to retrieve url logs from the firewall.
+.Parameter system
+Optional.
+Use this switch to specify that you want to retrieve system logs from the firewall.
+.Parameter query
+Optional.
+Specify the query to use to only retrieve specific logs if that is your goal. This query uses the same format as the firewall Web Interface. If a query is not specified then the most recent logs of the type specified will be gathered.
+.Parameter NumberOfLogsToReturn
+Optional.
+Specify how many log entries you want the firewall to gather. Max is 5000 logs. The default is 1000 logs.
 .Description
-Other:
-Relevant documentation.
-https://www.paloaltonetworks.com/documentation/71/pan-os/xml-api/pan-os-xml-api-request-types/retrieve-logs-api
+This function has been exposed to give the user more power to work with the firewall at a lower level. If successful this Cmdlet returns an object including the job ID of the job the firewall is running to retrieve the requested logs. 
+You can use the "Get-PaLogsFromJob" Cmdlet to retrieve the logs. If you don't require this lower level interaction you can use the following functions: Get-PaTrafficLogs, Get-PaThreatLogs, Get-PaURLLogs which will handle creating the job and returning the log entries to you.
+
 #>
 Function Request-PaLogs {
 	param (
@@ -2283,6 +2294,8 @@ Function Request-PaLogs {
 	[Parameter(Mandatory=$false,valueFromPipeline=$true)][String]$query,
     [Parameter(Mandatory=$false,valueFromPipeline=$true)][String]$NumberOfLogsToReturn=1000 #Max 5000
 	)
+	#Relevant documentation.
+	#https://www.paloaltonetworks.com/documentation/71/pan-os/xml-api/pan-os-xml-api-request-types/retrieve-logs-api
 	if(!$PaloAltoManagementSessionTable.findSessionByID($ID))
 	{
 		throw ('This session ID does not exist, you must create a session for this firewall or use an existing session. Check existing sessions using "Get-PaloAltoSession".')
@@ -2306,6 +2319,10 @@ Function Request-PaLogs {
 	if ($system)
 	{
 		$logType = 'system'
+	}
+	if (!($traffic -or $threat -or $url -or $system))
+	{
+		throw "You must specify a log type."
 	}
 	$response = [xml]$PaloAltoModuleWebClient.downloadstring("https://" + $PaloAltoManagementSessionTable.findSessionByID($ID).Hostname + "/api/?type=log&log-type=" + $logType + "&query=" + $query + "&nlogs = "+ $NumberOfLogsToReturn + "&key=" + (GetPaAPIKeyClearText))
 	ReturnPaAPIErrorIfError($response) #This function checks for an error from the firewall and throws it if there is one.
@@ -2351,7 +2368,7 @@ Function Get-PaLogsFromJob {
 		}
 		else
 		{
-			#If the job is finished leave the loop.
+			#If the job is not still "ACT" (Active) get out of the loop.
 			break
 		}
 	}
@@ -5022,7 +5039,7 @@ Function ParseURL
 	$userInput -match '(.*:\/\/)?([^\/]*)(\/.*)?' | Out-Null #Don't print any output.
 	$unParsedInput = $matches[2]
     #Check if the input has multiple colons, if it does then it is an IPv6 address
-    if ($unParsedInput.split(':').count -gt 2)
+    if ($unParsedInput.split(':').count -gt 1)
     {
         #If there are more than two results from the split then this must be an IPv6 address
         #Check if the input contains Square Brackets. If it does then there is a port specified.
@@ -5043,7 +5060,7 @@ Function ParseURL
             }
             Catch
             {
-                throw ('Error: A port was specified but could not be parsed. The port specified was: ' + $port)
+                throw ('Error: A port was specified but was found to be invalid. The port specified was: ' + $port)
             }
         }
         else
@@ -5075,7 +5092,7 @@ Function ParseURL
             {
                 if (!([int]$port -ge 0 -and [int]$port -le 65535))
                 {
-                    throw ('The specified port (' + $port + ') is not valid.')
+                    throw ('Error: A port was specified but was found to be invalid. The port specified was: ' + $port)
                 }
             }
             Catch

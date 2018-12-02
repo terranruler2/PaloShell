@@ -98,7 +98,7 @@ if (!($userIDTestUser1Found -and $userIDTestUser2Found))
 Get-PaAvailableSoftwareVersions -ID $sessionID 
 
 Request-PaAvailableSoftwareVersions -ID $sessionID 
-#resume check the script from this point (12-1-18)
+
 $managementSessions = Get-PaloAltoManagementSession 
 #Check that the management session populated correctly. It should have if we got to this point but double check.
 $managementSessionCheckPassed = $false
@@ -114,17 +114,19 @@ if (!$managementSessionCheckPassed)
 	throw 'Did not find a management session that matched the specified management session.' #Need to update this message
 }
 
-
 Get-PaSessionInformation -ID $sessionID 
 
+#resume check the script from this point (12-1-18)
 $test = Get-PaThreatLogs -ID $sessionID 
-$test.Logs.Logs
+#$test.Logs.Logs
 
 $test = Get-PaTrafficLogs -ID $sessionID 
-$test.Logs.Logs
+#$test.Logs.Logs
 
 $test = Get-PaURLLogs -ID $sessionID 
-$test.Logs.Logs
+#$test.Logs.Logs
+
+Check-PaLogsForBlockedTraffic -ID $sessionID 
 
 Get-PaVirtualRouters -ID $sessionID 
 
