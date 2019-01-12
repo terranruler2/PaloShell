@@ -762,6 +762,112 @@ Function Show-PaRuleHitCount {
 	return $result
 }
 
+ 
+<#
+.SYNOPSIS
+Returns a 3 second average of the number of kilobits per second that have passed through each QoS class on an interface.
+A value of 0 means that no traffic passed through the QoS class.
+If QoS is not enable on the interface this Cmdlet returns $false.
+.Parameter ID
+Required.
+This is the session ID of the firewall you wish to run this command on. You can find the ID to firewall mapping by running the "Get-PaloAltoManagementSession" command. 
+
+.PARAMETER Interface
+Required.
+Specify the interface to get statistics from.
+
+#>
+Function Show-PaQoSInterfaceStatistics {
+    param (
+    [Parameter(Mandatory=$true,valueFromPipeline=$true)][String]$ID,
+    [Parameter(Mandatory=$true,valueFromPipeline=$true)][String]$Interface,
+	[Parameter(Mandatory=$false,valueFromPipeline=$true)][switch]$ReturnRawData
+	#[Parameter(Mandatory=$true,valueFromPipeline=$true)][String]$QoSNode Currently only supports the default QiD which I believe is any traffic moving through the interface. I can't find much data on that. Here's a link that mentions QiD https://knowledgebase.paloaltonetworks.com/KCSArticleDetail?id=kA10g000000ClG3CAK
+    )
+	if(!$PaloAltoManagementSessionTable.findSessionByID($ID))
+	{
+		throw ('This session ID does not exist, you must create a session for this firewall or use an existing session. Check existing sessions using "Get-PaloAltoSession".')
+	}
+	Function ParseTextQosOutput {
+		param (
+		[Parameter(Mandatory=$true,valueFromPipeline=$true)][String]$string
+		)
+		$line.split(':')[1] -match '[0-9]+' | Out-Null
+        $kbps = $matches[0]
+		return $kbps
+	}
+	#Build the XML query for the call.
+    #Expand this to support more nodes in the future
+
+    $result = [xml]($PaloAltoModuleWebClient.downloadstring("https://" + $PaloAltoManagementSessionTable.findSessionByID($ID).Hostname + "/api/?type=op&cmd=<show><qos><interface><entry name='" + $Interface + "'><throughput>0</throughput></entry></interface></qos></show>&key=" + (GetPaAPIKeyClearText)))
+	ReturnPaAPIErrorIfError($result) #This function checks for an error from the firewall and throws it if there is one.
+	if ($ReturnRawData)
+	{
+		#If the user requested the raw data let them have it.
+		return $result
+	}
+	$usefulData = $result.response.result
+	if ($usefulData -match 'not enabled')
+	{
+		return $false
+	}
+	#Create the object to hold the data for Each QoS queue.
+	$QoSStatistics = New-Object psobject
+	#Set the value of all classes to 0
+	Add-Member -InputObject $QoSStatistics -MemberType NoteProperty -Name 'class1' -Value 0
+	Add-Member -InputObject $QoSStatistics -MemberType NoteProperty -Name 'class2' -Value 0
+	Add-Member -InputObject $QoSStatistics -MemberType NoteProperty -Name 'class3' -Value 0
+	Add-Member -InputObject $QoSStatistics -MemberType NoteProperty -Name 'class4' -Value 0
+	Add-Member -InputObject $QoSStatistics -MemberType NoteProperty -Name 'class5' -Value 0
+	Add-Member -InputObject $QoSStatistics -MemberType NoteProperty -Name 'class6' -Value 0
+	Add-Member -InputObject $QoSStatistics -MemberType NoteProperty -Name 'class7' -Value 0
+	Add-Member -InputObject $QoSStatistics -MemberType NoteProperty -Name 'class8' -Value 0
+	foreach ($line in $usefulData.split([Environment]::NewLine))
+    {
+        if ($line -match 'class 1:')
+        {
+            $QoSStatistics.class1 = (ParseTextQosOutput -string $line)
+            Write-Debug "Added information for class 1 throughput $kbps"
+        }
+        if ($line -match 'class 2:')
+        {
+            $QoSStatistics.class2 = (ParseTextQosOutput -string $line)
+            Write-Debug "Added information for class 2 throughput $kbps"
+        }
+        if ($line -match 'class 3:')
+        {
+            $QoSStatistics.class3 = (ParseTextQosOutput -string $line)
+            Write-Debug "Added information for class 3 throughput $kbps"
+        }
+        if ($line -match 'class 4:')
+        {
+            $QoSStatistics.class4 = (ParseTextQosOutput -string $line)
+            Write-Debug "Added information for class 4 throughput $kbps"
+        }
+        if ($line -match 'class 5:')
+        {
+            $QoSStatistics.class5 = (ParseTextQosOutput -string $line)
+            Write-Debug "Added information for class 5 throughput $kbps"
+        }
+        if ($line -match 'class 6:')
+        {
+            $QoSStatistics.class6 = (ParseTextQosOutput -string $line)
+            Write-Debug "Added information for class 6 throughput $kbps"
+        }
+        if ($line -match 'class 7:')
+        {
+            $QoSStatistics.class7 = (ParseTextQosOutput -string $line)
+            Write-Debug "Added information for class 7 throughput $kbps"
+        }
+        if ($line -match 'class 8:')
+        {
+            $QoSStatistics.class8 = (ParseTextQosOutput -string $line)
+            Write-Debug "Added information for class 8 throughput $kbps"
+        }
+        
+    }
+    return $QoSStatistics
+}
 
  <#
 .SYNOPSIS
