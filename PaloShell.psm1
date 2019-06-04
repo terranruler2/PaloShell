@@ -235,6 +235,7 @@ Function Add-PaloAltoManagementSession
 		[Parameter(Mandatory=$false,valueFromPipeline=$true)][String]$VirtualSystemNumber,
 		[Parameter(Mandatory=$false,valueFromPipeline=$true)][String]$Username,
 		[Parameter(Mandatory=$false,valueFromPipeline=$true)][String]$Password,
+		[Parameter(Mandatory=$false,valueFromPipeline=$true)][String]$APIKey,
 		[Parameter(Mandatory=$false,valueFromPipeline=$true)][String]$PANOSVersion,
 		[Parameter(Mandatory=$false,valueFromPipeline=$true)]$PSCredential,
 		[Parameter(Mandatory=$false,valueFromPipeline=$true)][Switch]$DisableSSLCertificateCheck
@@ -331,6 +332,10 @@ Function Add-PaloAltoManagementSession
 		{
 			#Error because you cannot just have a username and no password.
 			throw 'If you specify a username you must specify a password. If you specify neither you will be prompted for your credentials.'
+		}
+		elseif ($APIKey)
+		{
+			$result = (ConvertTo-SecureString -AsPlainText $APIKey -Force), 'UsernameUnknown'
 		}
 		else
 		{
@@ -598,6 +603,161 @@ Function Show-PaRunningConfig {
 	ReturnPaAPIErrorIfError($result) #This function checks for an error from the firewall and throws it if there is one.	
 	return $result.response.result
 }
+
+<#
+.SYNOPSIS
+This function allows you to send any request to the firewall. 
+.Parameter ID
+Required.
+This is the session ID of the firewall you wish to run this command on. You can find the ID to firewall mapping by running the "Get-PaloAltoManagementSession" command.
+
+.PARAMETER UrlXML
+Required.
+The raw command you want to run agains the api. You must specify the command type and the command. The following example will return the data for the "show running resource-monitor second" command from the api: 'type=op&cmd=<show><running><resource-monitor><second></second></resource-monitor></running></show>' .
+Note that the function automatically appends the API key to the URL after the string you specify.
+ 
+#>
+Function Call-PaAPIWithXML {
+param (
+    [Parameter(Mandatory=$true,valueFromPipeline=$true)][String]$ID,
+    [Parameter(Mandatory=$false,valueFromPipeline=$true)][String]$UrlXML
+    )
+	if(!$PaloAltoManagementSessionTable.findSessionByID($ID))
+	{
+		throw ('This session ID does not exist, you must create a session for this firewall or use an existing session. Check existing sessions using "Get-PaloAltoSession".')
+	}
+    if (!$UrlXML)
+    {
+        throw('You must specify a UrlXML. Example type=op&cmd=<show><config><running></running></config></show>')
+    }
+	$result = [xml]$PaloAltoModuleWebClient.downloadstring("https://" + $PaloAltoManagementSessionTable.findSessionByID($ID).Hostname + "/api/?" + $UrlXML + "&key=" + (GetPaAPIKeyClearText))
+
+	ReturnPaAPIErrorIfError($result) #This function checks for an error from the firewall and throws it if there is one.	
+	return $result
+}
+
+<#
+.SYNOPSIS
+This function allows you to show detailed information about individual dataplane CPU usage, packet buffers, and session usage percentage.
+.Parameter ID
+Required.
+This is the session ID of the firewall you wish to run this command on. You can find the ID to firewall mapping by running the "Get-PaloAltoManagementSession" command.
+
+.PARAMETER day 
+Optional.
+Per-day monitoring statistics
+This argument is only required if you want to reduce load on the firewall by only returning this specific type of data. If you specify more than one of the optional parameters then all data will be queried and only the requested data returned.
+
+.PARAMETER hour 
+Optional.
+Per-hour monitoring statistics
+This argument is only required if you want to reduce load on the firewall by only returning this specific type of data. If you specify more than one of the optional parameters then all data will be queried and only the requested data returned.
+
+
+.PARAMETER minute
+Optional.
+Per-minute monitoring statistics
+This argument is only required if you want to reduce load on the firewall by only returning this specific type of data. If you specify more than one of the optional parameters then all data will be queried and only the requested data returned.
+
+
+.PARAMETER second
+Optional.
+Per-second monitoring statistics
+This argument is only required if you want to reduce load on the firewall by only returning this specific type of data. If you specify more than one of the optional parameters then all data will be queried and only the requested data returned.
+
+.PARAMETER week
+Optional.
+Per-week monitoring statistics
+ This argument is only required if you want to reduce load on the firewall by only returning this specific type of data. If you specify more than one of the optional parameters then all data will be queried and only the requested data returned.
+
+#>
+
+Function ShowPaRunningResourceMonitor {
+param (
+    [Parameter(Mandatory=$true,valueFromPipeline=$true)][String]$ID,
+    [Parameter(Mandatory=$false,valueFromPipeline=$true)][switch]$day,
+	[Parameter(Mandatory=$false,valueFromPipeline=$true)][switch]$hour,
+	[Parameter(Mandatory=$false,valueFromPipeline=$true)][switch]$minute,
+	[Parameter(Mandatory=$false,valueFromPipeline=$true)][switch]$second,
+	[Parameter(Mandatory=$false,valueFromPipeline=$true)][switch]$week
+	#Need to add support for ingress-backlogs some day
+    )
+	#If any questions about this command reference https://knowledgebase.paloaltonetworks.com/KCSArticleDetail?id=kA10g000000ClXwCAK.
+	if(!$PaloAltoManagementSessionTable.findSessionByID($ID))
+	{
+		throw ('This session ID does not exist, you must create a session for this firewall or use an existing session. Check existing sessions using "Get-PaloAltoSession".')
+	}
+	$returnAllValues = $false
+	$returnDay = $false
+	$returnHour = $false
+	$returnMinute = $false
+	$returnSecond = $false
+	$returnWeek = $false
+	#Determine if more than one of the optional time parameters is true, or if none are.
+	$boolArray = $day, $hour, $min, $second, $week
+	$numberOfTimesSpecified = ($boolArray | Where {$_ -eq $true} | measure-object).count
+	if ($numberOfTimesSpecified -eq 1)
+	{
+		if ($day)
+		{
+			$returnDay = $true
+			$dataToReturn = 'day'
+		}
+		if ($hour)
+		{
+			$returnHour = $true
+			$dataToReturn = 'hour'
+		}
+		if ($minute)
+		{
+			$returnMinute = $true
+			$dataToReturn = 'minute'
+		}
+		if ($second)
+		{
+			$returnSecond = $true
+			$dataToReturn = 'second'
+		}
+		if ($week)
+		{
+			$returnWeek = $true
+			$dataToReturn = 'week'
+		}
+		$response = $PaloAltoModuleWebClient.downloadstring("https://" + $PaloAltoManagementSessionTable.findSessionByID($ID).Hostname + "/api/?type=op&cmd=<show><running><resource-monitor><$dataToReturn></$dataToReturn></resource-monitor></running></show>&key=" + (GetPaAPIKeyClearText))
+		ReturnPaAPIErrorIfError($response) #This function checks for an error from the firewall and throws it if there is one.
+	}
+	elseif ($numberOfTimesSpecified -gt 1 -and $numberOfTimesSpecified -lt 5)
+	{
+		#If we got here we know some of the time bools are true and we need to know which ones to return.
+		if ($day)
+		{
+			$returnDay = $true
+		}
+		if ($hour)
+		{
+			$returnHour = $true
+		}
+		if ($minute)
+		{
+			$returnMinute = $true
+		}
+		if ($second)
+		{
+			$returnSecond = $true
+		}
+		if ($week)
+		{
+			$returnWeek = $true
+		}
+	}
+	else
+	{
+		#If we got here then all optional values were specified.
+		$returnAllValues = $true
+	}
+	
+}
+
  <#
 .SYNOPSIS
 
