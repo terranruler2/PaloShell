@@ -12,16 +12,16 @@
 $ErrorActionPreference = 'Stop'
 
 #Check to see if the script is executing in powershell 6.
-if ($PSVersionTable.PSVersion.Major -eq 6)
+if ($PSVersionTable.PSVersion.Major -ge 6)
 {
-	$RunningPowershell6 = $true
+	$RunningPowershell6orGreater = $true
 }
 else
 {
-	$RunningPowershell6 = $false
+	$RunningPowershell6orGreater = $false
 }
 #The following Try Catch resolves an issue where $PaloAltoModuleWebClient.downloadstring will fail if a registry key is not set. Only do this for Windows PowerShell.
-if(!$RunningPowershell6)
+if(!$RunningPowershell6orGreater)
 {
 	#Allow weaker protocols SSL/TLS protocols if the host system is running a newer version of dotnet. This resolves an issue where the firewall may not have a strong SSL/TLS implementation available.
 	$AllProtocols = [System.Net.SecurityProtocolType]'Ssl3,Tls,Tls11,Tls12'
@@ -57,14 +57,14 @@ Add-Member -InputObject $PaloAltoManagementSessionTable -MemberType ScriptMethod
 	(
 		[Parameter(Mandatory=$true,valueFromPipeline=$true)][String]$ID
 	)
-    $managementSessions | where {$_.'SessionID' -eq $ID} #I hate to have to pipe this but it was the simplest solution for now and performance will likely not be hampered by searching through this list.
+    $managementSessions | Where-Object {$_.'SessionID' -eq $ID} #I hate to have to pipe this but it was the simplest solution for now and performance will likely not be hampered by searching through this list.
 }
 #The following method is used to give a count of the current entries in the PaloAltoManagementSessionTable .
 Add-Member -InputObject $PaloAltoManagementSessionTable -MemberType ScriptMethod -Name count -Value {
     $managementSessions.Count
 }
 Add-Member -InputObject $PaloAltoManagementSessionTable -MemberType ScriptMethod -Name listSessions -Value {
-	$managementSessions | select SessionID,Hostname,DisableSSLCertCheck,DeviceName,VirtualSystem,Username,PANOSMajorVersion,PANOSMinorVersion
+	$managementSessions | Select-Object SessionID,Hostname,DisableSSLCertCheck,DeviceName,VirtualSystem,Username,PANOSMajorVersion,PANOSMinorVersion
 }
 
 #The following powershell object works for abstracting web calls so they will work with Linux or Windows.
@@ -74,7 +74,7 @@ Add-Member -InputObject $PaloAltoModuleWebClient -MemberType ScriptMethod -Name 
 	(
 		[Parameter(Mandatory=$true,valueFromPipeline=$true)][String]$url
 	)
-	if (!$RunningPowershell6) #This check is needed because Powershell standard doesn't support using "Invoke-WebRequest" with the  "-SkipCertificateCheck" flag.
+	if (!$RunningPowershell6orGreater) #This check is needed because Powershell standard doesn't support using "Invoke-WebRequest" with the  "-SkipCertificateCheck" flag.
 	{
 		#Check if invalid SSL certificates should be ignored.
 		if (($PaloAltoManagementSessionTable.findSessionByID($ID).'DisableSSLCertCheck') -or $DisableSSLCertificateCheck)
@@ -135,7 +135,7 @@ Add-Member -InputObject $PaloAltoModuleWebClient -MemberType ScriptMethod -Name 
 		[Parameter(Mandatory=$true,valueFromPipeline=$true)][String]$url,
         [Parameter(Mandatory=$true,valueFromPipeline=$true)][String]$uploadString
 	)
-	if (!$RunningPowershell6) #This check is needed because Powershell standard doesn't support using "Invoke-WebRequest" with the  "-SkipCertificateCheck" flag.
+	if (!$RunningPowershell6orGreater) #This check is needed because Powershell standard doesn't support using "Invoke-WebRequest" with the  "-SkipCertificateCheck" flag.
 	{
 		#Check if invalid SSL certificates should be ignored.
 		if (($PaloAltoManagementSessionTable.findSessionByID($ID).'DisableSSLCertCheck') -or $DisableSSLCertificateCheck)
@@ -695,7 +695,7 @@ param (
 	$returnWeek = $false
 	#Determine if more than one of the optional time parameters is true, or if none are.
 	$boolArray = $day, $hour, $min, $second, $week
-	$numberOfTimesSpecified = ($boolArray | Where {$_ -eq $true} | measure-object).count
+	$numberOfTimesSpecified = ($boolArray | Where-Object {$_ -eq $true} | measure-object).count
 	if ($numberOfTimesSpecified -eq 1)
 	{
 		if ($day)
@@ -786,7 +786,7 @@ Function Show-PaRoutingTable {
     ReturnPaAPIErrorIfError($route) #This function checks for an error from the firewall and throws it if there is one.
 	#Print the route flags so the User knows what types are what.
 	$route.response.result.flags
-	$route.response.result.entry | ft
+	$route.response.result.entry | Format-Table
 }
 
  <#
@@ -1890,7 +1890,7 @@ Function Get-PaServiceGroups {
 		foreach ($member in $members) #This loops through all of the service members of the service group. Since I joined the members with semicolons I split them so I can loop through them like an array.
 		{
 			if($paServices.'Service Name' -contains $member){
-				$service = ($paServices | where {$_.'Service Name' -eq $member})
+				$service = ($paServices | Where-Object {$_.'Service Name' -eq $member})
 				$ports += [string]($service.Protocol + '-' + $service.Port + ';')
 				continue
 			}
@@ -1904,7 +1904,7 @@ Function Get-PaServiceGroups {
 				$ports += 'tcp-80;tcp-8080;'
 				continue #Break because otherwise ports can be erroneously filled in, also because it could be more effcient.
 			}
-			$ports += getServicesForGroup($paServiceGroups | where {$_.name -eq $member})
+			$ports += getServicesForGroup($paServiceGroups | Where-Object {$_.name -eq $member})
 		}
 		return $ports
 		Remove-Variable -Name ports
@@ -2044,7 +2044,7 @@ Function Get-PaAddressGroups {
 			{
 				if($paAddressObjects.'Address Name' -contains $member)
 				{
-					$address = ($paAddressObjects | where {$_.'Address Name' -eq $member})
+					$address = ($paAddressObjects | Where-Object-Object {$_.'Address Name' -eq $member})
 					if ($address.'fqdn')
 					{
 						$ipAddresses += ($address.'fqdn')
@@ -2061,7 +2061,7 @@ Function Get-PaAddressGroups {
 					$ipAddresses += ';'
 					continue #Break because otherwise addresses can be erroneously filled in, also because it could be more effcient.
 				}
-				$ipAddresses += (getAddressesForGroup($paAddressGroups | where {$_.'name' -eq $member}))
+				$ipAddresses += (getAddressesForGroup($paAddressGroups | Where-Object-Object {$_.'name' -eq $member}))
 			}
 		}
 		else
@@ -2070,7 +2070,7 @@ Function Get-PaAddressGroups {
 			{
 				if($paAddressObjects.'Address Name' -contains $member)
 				{
-					$address = ($paAddressObjects | where {$_.'Address Name' -eq $member})
+					$address = ($paAddressObjects | Where-Object {$_.'Address Name' -eq $member})
 					if ($address.'fqdn')
 					{
 						$ipAddresses += ($address.'fqdn')
@@ -2087,7 +2087,7 @@ Function Get-PaAddressGroups {
 					$ipAddresses += ';'
 					continue #Break because otherwise addresses can be erroneously filled in, also because it could be more effcient.
 				}
-				$ipAddresses += (getAddressesForGroup($paAddressGroups | where {$_.'name' -eq $member}))
+				$ipAddresses += (getAddressesForGroup($paAddressGroups | Where-Object {$_.'name' -eq $member}))
 			}
 		}
 		return $ipAddresses
@@ -2428,7 +2428,7 @@ Function Check-PaLogsForBlockedTraffic
 		$query += " and (" 
 		foreach ($SourceAddress in $SourceAddresses)
 		{
-			if ($SourceAddress.port -ne $null) #Check if a port was included for this address
+			if ($null -ne $SourceAddress.port) #Check if a port was included for this address
 			{
 				$query += "((addr.src eq '" + $SourceAddress.IpAddress + "') and (port.src eq " + $SourceAddress.port + ")) or "
 			}
@@ -2445,7 +2445,7 @@ Function Check-PaLogsForBlockedTraffic
 		$query += " and (" 
 		foreach ($DestinationAddress in $DestinationAddresses)
 		{
-			if ($DestinationAddress.port -ne $null) #Check if a port was included for this address
+			if ($null -ne $DestinationAddress.port) #Check if a port was included for this address
 			{
 				$query += "((addr.dst eq '" + $DestinationAddress.IpAddress + "') and (port.dst eq " + $DestinationAddress.port + ")) or "
 			}
@@ -5198,7 +5198,7 @@ function findPaWebCallErrorCode
 	(
         [Parameter(Mandatory=$true,valueFromPipeline=$true)]$exceptionObject
     )
-	if ($RunningPowershell6)
+	if ($RunningPowershell6orGreater)
 	{
 		if ($exceptionObject.Response.RequestMessage.Headers.UserAgent)
 		{
@@ -5600,7 +5600,7 @@ Function UpgradePaHaPair #This function is being actively developed but is not r
 		}
 	}
 	#Now check if the OS is downloaded and if not, download it.
-	if (!($fw1Versions | where {$_.Version -eq $TargetPANOSVersion}).isdownloaded)
+	if (!($fw1Versions | Where-Object {$_.Version -eq $TargetPANOSVersion}).isdownloaded)
 	{
 		#Download the software on firewall 1
 		try
@@ -5612,7 +5612,7 @@ Function UpgradePaHaPair #This function is being actively developed but is not r
 			throw("An error occured trying to download the software for the firewall with ID " + $FirewallID1 + ". The error was: " + $_.Exception.Message)
 		}
 	}
-	if (!($fw2Versions | where {$_.Version -eq $TargetPANOSVersion}).isdownloaded)
+	if (!($fw2Versions | Where-Object {$_.Version -eq $TargetPANOSVersion}).isdownloaded)
 	{
 		#Download the software on firewall 2
 		try
