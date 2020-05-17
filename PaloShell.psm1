@@ -672,14 +672,14 @@ Per-week monitoring statistics
 
 #>
 
-Function ShowPaRunningResourceMonitor {
+Function Show-PaRunningResourceMonitor {
 param (
     [Parameter(Mandatory=$true,valueFromPipeline=$true)][String]$ID,
-    [Parameter(Mandatory=$false,valueFromPipeline=$true)][switch]$day,
-	[Parameter(Mandatory=$false,valueFromPipeline=$true)][switch]$hour,
-	[Parameter(Mandatory=$false,valueFromPipeline=$true)][switch]$minute,
-	[Parameter(Mandatory=$false,valueFromPipeline=$true)][switch]$second,
-	[Parameter(Mandatory=$false,valueFromPipeline=$true)][switch]$week
+    [Parameter(Mandatory=$false,valueFromPipeline=$true)][switch]$day=$false,
+	[Parameter(Mandatory=$false,valueFromPipeline=$true)][switch]$hour=$false,
+	[Parameter(Mandatory=$false,valueFromPipeline=$true)][switch]$minute=$false,
+	[Parameter(Mandatory=$false,valueFromPipeline=$true)][switch]$second=$false,
+	[Parameter(Mandatory=$false,valueFromPipeline=$true)][switch]$week=$false
 	#Need to add support for ingress-backlogs some day
     )
 	#If any questions about this command reference https://knowledgebase.paloaltonetworks.com/KCSArticleDetail?id=kA10g000000ClXwCAK.
@@ -688,76 +688,217 @@ param (
 		throw ('This session ID does not exist, you must create a session for this firewall or use an existing session. Check existing sessions using "Get-PaloAltoSession".')
 	}
 	$returnAllValues = $false
-	$returnDay = $false
-	$returnHour = $false
-	$returnMinute = $false
-	$returnSecond = $false
-	$returnWeek = $false
+	# $returnDay = $false
+	# $returnHour = $false
+	# $returnMinute = $false
+	# $returnSecond = $false
+	# $returnWeek = $false
+	# $onlyOneTimeSpecified = $false
 	#Determine if more than one of the optional time parameters is true, or if none are.
 	$boolArray = $day, $hour, $min, $second, $week
 	$numberOfTimesSpecified = ($boolArray | Where-Object {$_ -eq $true} | measure-object).count
 	if ($numberOfTimesSpecified -eq 1)
 	{
+		#$onlyOneTimeSpecified = $true
 		if ($day)
 		{
-			$returnDay = $true
+			#$returnDay = $true
 			$dataToReturn = 'day'
 		}
 		if ($hour)
 		{
-			$returnHour = $true
+			#$returnHour = $true
 			$dataToReturn = 'hour'
 		}
 		if ($minute)
 		{
-			$returnMinute = $true
+			#$returnMinute = $true
 			$dataToReturn = 'minute'
 		}
 		if ($second)
 		{
-			$returnSecond = $true
+			#$returnSecond = $true
 			$dataToReturn = 'second'
 		}
 		if ($week)
 		{
-			$returnWeek = $true
+			#$returnWeek = $true
 			$dataToReturn = 'week'
 		}
+		#Get the current time immediately before the request is made.
+		$queryTime = (Get-Date).ToUniversalTime()
 		$response = $PaloAltoModuleWebClient.downloadstring("https://" + $PaloAltoManagementSessionTable.findSessionByID($ID).Hostname + "/api/?type=op&cmd=<show><running><resource-monitor><$dataToReturn></$dataToReturn></resource-monitor></running></show>&key=" + (GetPaAPIKeyClearText))
-		ReturnPaAPIErrorIfError($response) #This function checks for an error from the firewall and throws it if there is one.
 	}
-	elseif ($numberOfTimesSpecified -gt 1 -and $numberOfTimesSpecified -lt 5)
+	else 
 	{
-		#If we got here we know some of the time bools are true and we need to know which ones to return.
-		if ($day)
-		{
-			$returnDay = $true
-		}
-		if ($hour)
-		{
-			$returnHour = $true
-		}
-		if ($minute)
-		{
-			$returnMinute = $true
-		}
-		if ($second)
-		{
-			$returnSecond = $true
-		}
-		if ($week)
-		{
-			$returnWeek = $true
-		}
+		#Get the current time immediately before the request is made.
+		$queryTime = (Get-Date).ToUniversalTime()
+		$response = $PaloAltoModuleWebClient.downloadstring("https://" + $PaloAltoManagementSessionTable.findSessionByID($ID).Hostname + "/api/?type=op&cmd=<show><running><resource-monitor></resource-monitor></running></show>&key=" + (GetPaAPIKeyClearText))
 	}
-	else
+	ReturnPaAPIErrorIfError($response) #This function checks for an error from the firewall and throws it if there is one.
+	if ($numberOfTimesSpecified -eq 0)
 	{
-		#If we got here then all optional values were specified.
 		$returnAllValues = $true
 	}
+	$returnObject = New-Object psobject
+	if ($day -or $returnAllValues)
+	{
+		$stats = FortmatRunningResourceMonitorOutput -inputXML $response -pollTime $queryTime -statToProcess 'day'
+		Add-Member -InputObject $returnObject -MemberType NoteProperty -Name 'Day' -Value $stats
+	}
+	if ($hour -or $returnAllValues)
+	{
+		$stats = FortmatRunningResourceMonitorOutput -inputXML $response -pollTime $queryTime -statToProcess 'hour'
+		Add-Member -InputObject $returnObject -MemberType NoteProperty -Name 'Hour' -Value $stats
+	}
+	if ($minute -or $returnAllValues)
+	{
+		$stats = FortmatRunningResourceMonitorOutput -inputXML $response -pollTime $queryTime -statToProcess 'minute'
+		Add-Member -InputObject $returnObject -MemberType NoteProperty -Name 'Minute' -Value $stats
+	}
+	if ($second -or $returnAllValues)
+	{
+		$stats = FortmatRunningResourceMonitorOutput -inputXML $response -pollTime $queryTime -statToProcess 'second'
+		Add-Member -InputObject $returnObject -MemberType NoteProperty -Name 'Second' -Value $stats
+	}
+	if ($week -or $returnAllValues)
+	{
+		$stats = FortmatRunningResourceMonitorOutput -inputXML $response -pollTime $queryTime -statToProcess 'week'
+		Add-Member -InputObject $returnObject -MemberType NoteProperty -Name 'Week' -Value $stats
+	}
+	return $returnObject
 	
 }
 
+Function FortmatRunningResourceMonitorOutput{
+	param (
+	[Parameter(Mandatory=$true,valueFromPipeline=$true)]$inputXML,
+	[Parameter(Mandatory=$true,valueFromPipeline=$true)][datetime]$pollTime,
+	[Parameter(Mandatory=$true,valueFromPipeline=$true)][string]$statToProcess
+	)
+	$rawDataPlaneStats = $inputXML.response.result.'resource-monitor'.'data-processors'
+	$cpuAverageUsage = parsePaDataPlaneCpuStats -inputXML $rawDataPlaneStats -cpuStatName 'cpu-load-average' -statToProcess $statToProcess -pollTime $pollTime
+	$cpuMaxUsage = parsePaDataPlaneCpuStats -inputXML $rawDataPlaneStats -cpuStatName 'cpu-load-maximum' -statToProcess $statToProcess -pollTime $pollTime
+	$resourceUsage = parsePaResourceUtilzationStats -inputXML $rawDataPlaneStats -statToProcess $statToProcess -pollTime $pollTime
+	$returnObject = New-Object PSObject
+	Add-Member -InputObject $returnObject -MemberType NoteProperty -Name 'cpuAverageUsage' -Value $cpuAverageUsage
+	Add-Member -InputObject $returnObject -MemberType NoteProperty -Name 'cpuMaxUsage' -Value $cpuMaxUsage
+	Add-Member -InputObject $returnObject -MemberType NoteProperty -Name 'resourceUsage' -Value $resourceUsage
+	return $returnObject
+}
+
+Function parsePaResourceUtilzationStats{
+	param (
+		[Parameter(Mandatory=$true,valueFromPipeline=$true)]$inputXML,
+		[Parameter(Mandatory=$true,valueFromPipeline=$true)][string]$statToProcess,
+		[Parameter(Mandatory=$true,valueFromPipeline=$true)][datetime]$pollTime
+	)
+	$resourceResult = New-Object System.Collections.ArrayList
+	$startSecondsBack, $decrementSeconds = getTimesForStatsProcessing -statToProcess $statToProcess -pollTime $pollTime
+	foreach ($processor in $inputXML)
+	{
+		foreach ($entry in $processor.($processor.FirstChild.Name).$statToProcess.'resource-utilization'.entry)
+		{
+			$entryobject = New-Object psobject
+			Add-Member -InputObject $entryobject -MemberType NoteProperty -Name 'Name' -Value $entry.name
+			Add-Member -InputObject $entryobject -MemberType NoteProperty -Name 'DataPlane' -Value $processor.FirstChild.Name
+			$resourceValues = New-Object System.Collections.ArrayList
+			$secondsBack = $startSecondsBack
+			foreach ($resourceValue in $entry.value.split(','))
+			{
+				$cpuObject = New-Object psobject
+				Add-Member -InputObject $cpuObject -MemberType NoteProperty -Name 'DateTime' -Value $pollTime.AddSeconds($secondsBack).ToString("yyyy-MM-dd-HH:mm:ss")
+				Add-Member -InputObject $cpuObject -MemberType NoteProperty -Name 'Value' -Value $resourceValue
+				[void]$resourceValues.Add($cpuObject)
+				$secondsBack = $secondsBack - $decrementSeconds
+			}
+			Add-Member -InputObject $entryobject -MemberType NoteProperty -Name 'Usage' -Value $resourceValues
+			[void]$resourceResult.add($entryobject)
+		}
+	}
+	return $resourceResult
+}
+Function parsePaDataPlaneCpuStats{
+	param (
+		[Parameter(Mandatory=$true,valueFromPipeline=$true)]$inputXML,
+		[Parameter(Mandatory=$true,valueFromPipeline=$true)]$cpuStatName,
+		[Parameter(Mandatory=$true,valueFromPipeline=$true)][string]$statToProcess,
+		[Parameter(Mandatory=$true,valueFromPipeline=$true)][datetime]$pollTime
+	)
+	$result = New-Object System.Collections.ArrayList
+	$startSecondsBack, $decrementSeconds = getTimesForStatsProcessing -statToProcess $statToProcess -pollTime $pollTime
+	foreach ($processor in $inputXML)
+	{
+		foreach ($entry in $processor.($processor.FirstChild.Name).$statToProcess.$cpuStatName.entry)
+		{
+			$entryobject = New-Object psobject
+			Add-Member -InputObject $entryobject -MemberType NoteProperty -Name 'coreID' -Value $entry.coreid
+			Add-Member -InputObject $entryobject -MemberType NoteProperty -Name 'DataPlane' -Value $processor.FirstChild.Name
+			$cpuValues = New-Object System.Collections.ArrayList
+			$secondsBack = $startSecondsBack
+			foreach ($cpuUsageValue in $entry.value.split(','))
+			{
+				$cpuObject = New-Object psobject
+				Add-Member -InputObject $cpuObject -MemberType NoteProperty -Name 'DateTime' -Value $pollTime.AddSeconds($secondsBack).ToString("yyyy-MM-dd-HH:mm:ss")
+				Add-Member -InputObject $cpuObject -MemberType NoteProperty -Name 'Value' -Value $cpuUsageValue
+				[void]$cpuValues.Add($cpuObject)
+				$secondsBack = $secondsBack - $decrementSeconds
+			}
+			Add-Member -InputObject $entryobject -MemberType NoteProperty -Name 'Usage' -Value $cpuValues
+        [void]$result.add($entryobject)
+		}
+	}
+	return $result
+}
+
+Function getTimesForStatsProcessing{
+	param (
+		[Parameter(Mandatory=$true,valueFromPipeline=$true)][string]$statToProcess,
+		[Parameter(Mandatory=$true,valueFromPipeline=$true)][datetime]$pollTime
+	)
+	if ($statToProcess -eq 'second')
+	{
+		$startSecondsBack = -1
+		$decrementSeconds = 1
+	}elseif ($statToProcess -eq 'minute')
+	{
+		#go back to the last exact minute.
+		$secondsPastMinute= $pollTime.Second
+		$startSecondsBack = ($secondsPastMinute + 60) * -1 #go back to previous minute.
+		$decrementSeconds = 60
+	}elseif ($statToProcess -eq 'hour')
+	{
+		#go back to the last exact hour.
+		$secondsPastMinute= $pollTime.Second
+		$minutesPastHour = $pollTime.Minute
+		$startSecondsBack = ($secondsPastMinute + ($minutesPastHour * 60) + 3600) * -1
+		$decrementSeconds = 3600
+	}
+	elseif ($statToProcess -eq 'day')
+	{
+		#go back to the last exact day.
+		$secondsPastMinute= $pollTime.Second
+		$minutesPasHour = $pollTime.Minute
+		$hoursPastDay = $pollTime.hour
+		$startSecondsBack = ($secondsPastMinute + ($minutesPasHour * 60) + ($hoursPastDay * 3600) + 86400) * -1
+		$decrementSeconds = 86400
+	}elseif ($statToProcess -eq 'week')
+	{
+		#go back to the last exact week. Weeks start on Monday apparently. ISO 8601. Powershell thinks the week starts on Sunday, so make Monday the start of the week.
+		$secondsPastMinute= $pollTime.Second
+		$minutesPasHour = $pollTime.Minute
+		$hoursPastDay = $pollTime.hour
+		$dayOfWeek = [int]$pollTime.DayOfWeek
+		if ($dayOfWeek -eq 0)
+		{
+			$dayOfWeek = 7
+		}
+		$daysPastMonday = $dayOfWeek -1
+		$startSecondsBack = ($secondsPastMinute + ($minutesPasHour * 60) + ($hoursPastDay * 3600) + ($daysPastMonday * 86400) + 604800) * -1
+		$decrementSeconds = 604800
+	}
+	return $startSecondsBack, $decrementSeconds
+}
  <#
 .SYNOPSIS
 
